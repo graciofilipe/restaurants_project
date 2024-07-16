@@ -31,7 +31,6 @@ def access_secret_version(project_id, secret_id, version_id="latest"):
     return response.payload.data.decode("UTF-8")
 
 # Set environment variable for API key
-
 API_KEY= access_secret_version(project_id='xxxxxxx', secret_id='yyyyyyy')
 
 def send_request(lat_long_pairs):
@@ -83,7 +82,7 @@ def send_request(lat_long_pairs):
     
     
   df_new = pd.DataFrame(restaurants, columns=['id','displayName', 'shortFormattedAddress', 'rating', 'priceLevel'])
-  # remove rows with duplicated indexes
+  # remove rows with duplicated indexes - the same restaurant can be found in more than once call
   df_new.set_index('id', inplace=True)
   df_new = df_new.loc[~df_new.index.duplicated(keep='first')]
   df_new = df_new.sort_index()
@@ -94,7 +93,7 @@ def send_request(lat_long_pairs):
   # merge the two dataframes to keep all restaurants in both dataframes
   df_updated = pd.concat([df_old, df_new], axis=0, join='outer')
 
-  # remove duplicates
+  # remove duplicates (restaurants found last week AND this week)
   df_updated = df_updated.loc[~df_updated.index.duplicated(keep='last')]
   df_updated = df_updated.sort_index()
   df_updated.sort_values(by=['rating'], ascending=False, inplace=True)
