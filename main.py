@@ -88,16 +88,18 @@ def send_request(lat_long_pairs):
   df_new = df_new.loc[~df_new.index.duplicated(keep='first')]
   df_new = df_new.sort_index()
   
-
-  # read a pip
-
-
+  #get the old record of all restaurants  
   df_old = pd.read_csv('gs://your-bucket-name/restaurants.csv', index_col='id')
+  
   # merge the two dataframes to keep all restaurants in both dataframes
   df_updated = pd.concat([df_old, df_new], axis=0, join='outer')
+
+  # remove duplicates
   df_updated = df_updated.loc[~df_updated.index.duplicated(keep='last')]
   df_updated = df_updated.sort_index()
   df_updated.sort_values(by=['rating'], ascending=False, inplace=True)
+
+  # write back all (old and new) restaurants
   df_updated.to_csv('gs://your-bucket-name/restaurants.csv')
 
   # find out the rows that are in df_updated but not in df_old
