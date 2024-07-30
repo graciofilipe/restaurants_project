@@ -16,4 +16,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 
 # Define the command to run when the container starts
-CMD ["python", "main.py"]
+ENTRYPOINT ["python", "main.py"]
