@@ -47,8 +47,6 @@ if __name__ == '__main__':
     
     args = parser.parse_args()
 
-    import ipdb; ipdb.set_trace()
-
     lat_long_grid = build_lat_long_grid(string_to_tuple(args.top_left),
                                         string_to_tuple(args.bottom_right),
                                         int(args.n_steps))
