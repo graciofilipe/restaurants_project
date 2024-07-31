@@ -4,6 +4,9 @@ import argparse
 from datetime import datetime
 from google.cloud import secretmanager
 from datetime import datetime
+import os
+
+
 
 
 def get_bucket_name(project_id, version_id="latest"):
@@ -78,7 +81,7 @@ if __name__ == '__main__':
                                         int(args.n_steps))
 
     restaurants = iterate_over_calls(lat_long_grid, project_id=project_id)
-    
+
     df_new = create_dataframe(restaurants)
     update_df_and_save(df_new, restaurant_bucket_name)
   
