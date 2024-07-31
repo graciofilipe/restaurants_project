@@ -23,8 +23,8 @@ def get_coordinates(project_id, version_id="latest"):
     # Create the Secret Manager client.
     client = secretmanager.SecretManagerServiceClient()
     
-    top_left = f"projects/{project_id}/secrets/restaurant_top_left/versions/{version_id}"
-    top_left_response = client.access_secret_version(request={"name": top_left_response})
+    bottom_right = f"projects/{project_id}/secrets/restaurant_top_left/versions/{version_id}"
+    top_left_response = client.access_secret_version(request={"name": bottom_right})
 
     bottom_right = f"projects/{project_id}/secrets/restaurant_bottom_right/versions/{version_id}"
     bottom_right_response = client.access_secret_version(request={"name": bottom_right})
