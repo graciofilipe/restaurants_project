@@ -24,10 +24,10 @@ def get_coordinates(project_id, version_id="latest"):
     client = secretmanager.SecretManagerServiceClient()
     
     top_left = f"projects/{project_id}/secrets/restaurant_top_left/versions/{version_id}"
-    top_left_response = client.access_secret_version(request={"name": name})
+    top_left_response = client.access_secret_version(request={"name": top_left_response})
 
     bottom_right = f"projects/{project_id}/secrets/restaurant_bottom_right/versions/{version_id}"
-    bottom_right_response = client.access_secret_version(request={"name": name})
+    bottom_right_response = client.access_secret_version(request={"name": bottom_right})
 
 
     return top_left_response.payload.data.decode("UTF-8"), bottom_right_response.payload.data.decode("UTF-8")
@@ -69,7 +69,7 @@ if __name__ == '__main__':
     # get the project id from environment variable: 
     project_id = os.environ.get('PROJECT_ID')
     print("********* PROJECT ID IS: " + project_id + " *********")
-    
+
     restaurant_bucket_name = get_bucket_name(project_id=project_id, version_id="latest")
     top_left, bottom_right = get_coordinates(project_id=project_id, version_id="latest")
 
