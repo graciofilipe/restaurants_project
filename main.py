@@ -4,8 +4,6 @@ import argparse
 from datetime import datetime
 
 
-
-
 def build_lat_long_grid(top_left, bottom_right, n_steps):
 
     lat_step = (top_left[0] - bottom_right[0]) / n_steps
@@ -38,6 +36,9 @@ def string_to_tuple(string):
 
 if __name__ == '__main__':
 
+    # get the project id from environment variable: 
+    project_id = os.environ.get('PROJECT_ID')
+    
     parser = argparse.ArgumentParser()
     parser.add_argument("--project_id", required=True)
     parser.add_argument("--bucket_name", required=True)
@@ -50,7 +51,7 @@ if __name__ == '__main__':
     lat_long_grid = build_lat_long_grid(string_to_tuple(args.top_left),
                                         string_to_tuple(args.bottom_right),
                                         int(args.n_steps))
-    restaurants = iterate_over_calls(lat_long_grid, project_id=args.project_id)
+    restaurants = iterate_over_calls(lat_long_grid, project_id=project_id)
     df_new = create_dataframe(restaurants)
     update_df_and_save(df_new, args.bucket_name)
   
