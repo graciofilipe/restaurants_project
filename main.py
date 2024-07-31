@@ -68,6 +68,8 @@ if __name__ == '__main__':
 
     # get the project id from environment variable: 
     project_id = os.environ.get('PROJECT_ID')
+    print("********* PROJECT ID IS: " + project_id + " *********")
+    
     restaurant_bucket_name = get_bucket_name(project_id=project_id, version_id="latest")
     top_left, bottom_right = get_coordinates(project_id=project_id, version_id="latest")
 
