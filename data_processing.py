@@ -2,6 +2,7 @@ from maps_call import send_request
 import pandas as pd
 from google.cloud import secretmanager
 from datetime import datetime
+from google.cloud import storage
 
 
 def access_secret_version(project_id, secret_id, version_id="latest"):

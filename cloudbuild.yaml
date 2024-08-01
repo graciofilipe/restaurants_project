@@ -23,4 +23,5 @@ steps:
       - --region=europe-west1
       - --cpu=2
       - --memory=2Gi
+      - --max-retries=0
       - --set-env-vars=PROJECT_ID=$PROJECT_ID
