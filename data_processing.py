@@ -35,7 +35,10 @@ def iterate_over_calls(lat_long_pairs, project_id):
 
     API_KEY= access_secret_version(project_id=project_id, secret_id='maps-key')
 
-    restaurants = []
+    restaurants = {}
+    
+    today = date.today()
+    formatted_date = today.strftime("%Y-%m-%d")
 
     for rank in ["DISTANCE", "POPULARITY"]:
         for lat, long, radius in lat_long_pairs:
@@ -44,43 +47,71 @@ def iterate_over_calls(lat_long_pairs, project_id):
             
             try:
                 for place in response_json['places']:
-                    restaurants.append({
-                    'displayName': place['displayName']['text'],
-                    'shortFormattedAddress': place['shortFormattedAddress'],
-                    'rating': place.get('rating', 0),
-                    'priceLevel': place.get('priceLevel', "NA"),
-                    'id': place['id'],
-
-                    })
+                    restaurants[place['id']] = {
+                        'displayName': place['displayName']['text'],
+                        'shortFormattedAddress': place['shortFormattedAddress'],
+                        'rating': place.get('rating', 0),
+                        'priceLevel': place.get('priceLevel', "NA"),
+                        'last_seen': formatted_date,
+                    }
             except:
                 print(str(lat) + str(long) +' had no results')
                 pass
-    
     return restaurants
 
 
-def create_dataframe(restaurants):
 
-    df_new = pd.DataFrame(restaurants, columns=['id','displayName', 'shortFormattedAddress', 'rating', 'priceLevel'])
-    # remove rows with duplicated indexes
-    df_new.set_index('id', inplace=True)
-    df_new = df_new.loc[~df_new.index.duplicated(keep='first')]
-    df_new = df_new.sort_index()
 
-    return df_new
+def read_old_restaurants(bucket_name):
+    storage_client = storage.Client()
+    bucket = storage_client.bucket(bucket_name)
+    blob = bucket.blob(f'gs://{bucket_name}/restaurants.json')
+    json_string = blob.download_as_string().decode('utf-8')
+    data = json.loads(json_string)
+    return data
 
-def update_df_and_save(df_new, bucket_name):
-    df_old = pd.read_csv(f'gs://{bucket_name}/restaurants.csv', index_col='id')
-    # merge the two dataframes to keep all restaurants in both dataframes
-    df_updated = pd.concat([df_old, df_new], axis=0, join='outer')
-    df_updated = df_updated.loc[~df_updated.index.duplicated(keep='last')]
-    df_updated = df_updated.sort_index()
-    df_updated.sort_values(by=['rating'], ascending=False, inplace=True)
-    df_updated.to_csv(f'gs://{bucket_name}/restaurants.csv')
 
-    # find out the rows that are in df_updated but not in df_old
-    new_rows = df_updated[~df_updated.index.isin(df_old.index)]
-    new_rows.to_csv(f'gs://{bucket_name}/new_restaurants_{datetime.now().strftime("%Y%m%d_%H%M%S")}.csv')
-    print(df_updated)
-    print('NEW RESTAURANTS')
-    print(new_rows)
+def update_json_and_save(new_data, bucket_name):
+    json_old = read_old_restaurants(bucket_name)
+    
+    new_restaurants = {}
+    for restaurant_id, restaurant_data in new_data.items():
+        
+        #case one, the restaurant is new
+        if restaurant_id not in json_old:
+            new_restaurants[restaurant_id] = restaurant_data
+            new_restaurants[restaurant_id]['first_seen'] = new_restaurants[restaurant_id]['last_seen']
+
+        #case two, the restaurant has been seen before
+        else:
+            # update the rating
+            json_old[restaurant_id]['rating'] = restaurant_data['rating']
+            # update the address
+            json_old[restaurant_id]['shortFormattedAddress'] = restaurant_data['shortFormattedAddress']
+            # update the price level
+            json_old[restaurant_id]['priceLevel'] = restaurant_data['priceLevel']
+            # update the last_seen
+            json_old[restaurant_id]['last_seen'] = restaurant_data['last_seen']
+
+      
+
+    print("** new restaurants **")
+    print(new_restaurants)
+
+
+    # Create a new dictionary to store the concatenated results
+    concatenated_dict = json_old.copy()
+
+    # Update the concatenated dictionary with values from dict2
+    concatenated_dict.update(new_restaurants)
+
+
+    # write json_old and new_restaurants into cloud storage:
+    storage_client = storage.Client()
+    bucket = storage_client.bucket(bucket_name)
+
+    blob = bucket.blob(f'gs://{bucket_name}/restaurants_{datetime.now().strftime("%Y%m%d_%H%M%S")}.json')
+    blob.upload_from_string(json.dumps(new_restaurants), content_type='application/json')
+
+    blob = bucket.blob(f'gs://{bucket_name}/restaurants_{datetime.now().strftime("%Y%m%d_%H%M%S")}.json')
+    blob.upload_from_string(json.dumps(json_old), content_type='application/json')

@@ -1,5 +1,5 @@
 from google.cloud import secretmanager
-from data_processing import iterate_over_calls, create_dataframe, update_df_and_save
+from data_processing import iterate_over_calls, read_old_restaurants, update_json_and_save
 import argparse
 from datetime import datetime
 from google.cloud import secretmanager
@@ -82,8 +82,7 @@ if __name__ == '__main__':
 
     restaurants = iterate_over_calls(lat_long_grid, project_id=project_id)
 
-    df_new = create_dataframe(restaurants)
-    update_df_and_save(df_new, restaurant_bucket_name)
+    update_json_and_save(new_data=restaurants, bucket_name=restaurant_bucket_name)
   
 
 
