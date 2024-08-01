@@ -37,7 +37,7 @@ def iterate_over_calls(lat_long_pairs, project_id):
 
     restaurants = {}
     
-    today = datetime.date.today()
+    today = datetime.today()
     formatted_date = today.strftime("%Y-%m-%d")
 
     for rank in ["DISTANCE", "POPULARITY"]:
