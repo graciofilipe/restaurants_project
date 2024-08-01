@@ -66,7 +66,7 @@ def iterate_over_calls(lat_long_pairs, project_id):
 def read_old_restaurants(bucket_name):
     storage_client = storage.Client()
     bucket = storage_client.bucket(bucket_name)
-    blob = bucket.blob(f'gs://{bucket_name}/restaurants.json')
+    blob = bucket.blob('restaurants.json')
     json_string = blob.download_as_string().decode('utf-8')
     data = json.loads(json_string)
     return data
