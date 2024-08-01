@@ -116,5 +116,5 @@ def update_json_and_save(new_data, bucket_name):
     blob = bucket.blob(f'restaurants_{datetime.now().strftime("%Y%m%d_%H%M%S")}.json')
     blob.upload_from_string(json.dumps(new_restaurants), content_type='application/json')
 
-    blob = bucket.blob(f'restaurants_{datetime.now().strftime("%Y%m%d_%H%M%S")}.json')
-    blob.upload_from_string(json.dumps(json_old), content_type='application/json')
+    blob = bucket.blob(f'restaurants.json')
+    blob.upload_from_string(json.dumps(concatenated_dict), content_type='application/json')
