@@ -4,6 +4,9 @@ from google.cloud import secretmanager
 from datetime import datetime
 from google.cloud import storage
 import json
+import googlemaps
+from geopy.distance import geodesic
+from math import radians, cos, sin, atan2, pi
 
 
 
@@ -34,11 +37,14 @@ def access_secret_version(project_id, secret_id, version_id="latest"):
 
 
 
-def iterate_over_calls(lat_long_pairs, project_id):
+
+
+
+def iterate_over_calls(lat_long_pairs, restaurants, project_id):
 
     API_KEY= access_secret_version(project_id=project_id, secret_id='maps-key')
 
-    restaurants = {}
+    saturated_list = []
     
     today = datetime.today()
     formatted_date = today.strftime("%Y-%m-%d")
@@ -47,20 +53,26 @@ def iterate_over_calls(lat_long_pairs, project_id):
         for lat, long, radius in lat_long_pairs:
 
             response_json = send_request(lat, long, radius, rank, API_KEY)
-            
-            try:
-                for place in response_json['places']:
-                    restaurants[place['id']] = {
-                        'displayName': place['displayName']['text'],
-                        'shortFormattedAddress': place['shortFormattedAddress'],
-                        'rating': place.get('rating', 0),
-                        'priceLevel': place.get('priceLevel', "NA"),
-                        'last_seen': formatted_date,
-                    }
-            except:
+            if 'places' not in response_json:
                 print(str(lat) + str(long) +' had no results')
-                pass
-    return restaurants
+            
+            else:
+                if len(response_json['places']) == 20:
+                    print(str(lat) + str(long) +' had 20 results')
+
+                    saturated_list.append((lat, long, radius/2))
+                else:
+                    print(str(lat) + str(long) +' had 1-19 results')
+                    for place in response_json['places']:
+                        restaurants[place['id']] = {
+                            'displayName': place['displayName']['text'],
+                            'shortFormattedAddress': place['shortFormattedAddress'],
+                            'rating': place.get('rating', 0),
+                            'priceLevel': place.get('priceLevel', "NA"),
+                            'last_seen': formatted_date,
+                        }
+
+    return restaurants, saturated_list
 
 
 
@@ -118,3 +130,99 @@ def update_json_and_save(new_data, bucket_name):
 
     blob = bucket.blob(f'restaurants.json')
     blob.upload_from_string(json.dumps(concatenated_dict), content_type='application/json')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+def recurse_over_calls(lat, long, center, project_id, restaurants={}, list_of_called_points=[]):
+    import ipdb; ipdb.set_trace()
+    rank = "DISTANCE"
+    radius = 5000
+    API_KEY= access_secret_version(project_id=project_id, secret_id='maps-key')
+    today = datetime.today()
+    formatted_date = today.strftime("%Y-%m-%d")
+
+    if check_coordinates_are_close_to_centre(API_KEY, lat, long, center, walking_threshold=20):
+
+        print("SENDING A REQUEST!!!!!")
+        response_json = send_request(lat, long, radius, rank, API_KEY)
+        list_of_called_points.append((lat, long))
+
+        if len(response_json['places']) >= 20:
+            print("** 20 results **")
+
+            # capture the results anyway
+            for place in response_json['places']:
+                        restaurants[place['id']] = {
+                            'displayName': place['displayName']['text'],
+                            'shortFormattedAddress': place['shortFormattedAddress'],
+                            'rating': place.get('rating', 0),
+                            'priceLevel': place.get('priceLevel', "NA"),
+                            'last_seen': formatted_date,
+                        }
+            # create the 9 sub distances
+            new_points_list = generate_spoke_points(lat, long, radius_meters=400, num_points=4)
+            accepted_points_list = [point for point in new_points_list if not is_point_inside_polygon(list_of_called_points, point[0], point[1])]
+            print('accepted points list', accepted_points_list)
+            # call the function over the 9 subdistances
+            for point in new_points_list:
+                recurse_over_calls(point[0], point[1], center, project_id, restaurants, list_of_called_points)
+         
+        # the base case
+        elif len(response_json['places']) < 20 and len(response_json['places']) > 0:
+            print("** less than 20 results **")
+            # capture the results anyway
+            for place in response_json['places']:
+                        restaurants[place['id']] = {
+                            'displayName': place['displayName']['text'],
+                            'shortFormattedAddress': place['shortFormattedAddress'],
+                            'rating': place.get('rating', 0),
+                            'priceLevel': place.get('priceLevel', "NA"),
+                            'last_seen': formatted_date,
+                        }
+    return restaurants
+
+def is_point_inside_polygon(polygon_points, x1, y1):
+    """
+    Determines if a point is inside a polygon using the ray casting algorithm.
+
+    Args:
+        polygon_points: List of tuples representing (x, y) coordinates of the polygon's vertices.
+        x1: X coordinate of the point to check.
+        y1: Y coordinate of the point to check.
+
+    Returns:
+        True if the point is inside the polygon, False otherwise.
+    """
+    num_vertices = len(polygon_points)
+    inside = False
+    
+    # Iterate through all edges of the polygon
+    for i in range(num_vertices):
+        j = (i + 1) % num_vertices  # Next vertex (wrap around to 0 if at last vertex)
+        x_i, y_i = polygon_points[i]
+        x_j, y_j = polygon_points[j]
+
+        # Check if the horizontal ray from the point intersects the edge
+        intersect = (y_i > y1) != (y_j > y1) and (
+            x1 < (x_j - x_i) * (y1 - y_i) / (y_j - y_i) + x_i
+        )
+        if intersect:
+            inside = not inside  # Toggle inside/outside status with each intersection
+            
+    return inside

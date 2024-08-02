@@ -1,10 +1,12 @@
 from google.cloud import secretmanager
-from data_processing import iterate_over_calls, read_old_restaurants, update_json_and_save
+from data_processing import iterate_over_calls, read_old_restaurants, update_json_and_save, recurse_over_calls
 import argparse
 from datetime import datetime
 from google.cloud import secretmanager
 from datetime import datetime
 import os
+from geopy.distance import geodesic
+
 
 
 
@@ -64,6 +66,40 @@ def string_to_tuple(string):
     return float(string[0]), float(string[1])
 
 
+def check_coordinates_are_close_to_centre(API, lat, long, center, walking_threshold=20):
+    gmaps = googlemaps.Client(key=API)
+    point1 = (lat, long)
+    dm = gmaps.distance_matrix(point1, center, mode='walking')
+    walking_minutes = (dm['rows'][0]['elements'][0]['duration']['value'])/60
+    return walking_minutes < walking_threshold
+
+
+def generate_spoke_points(center_lat, center_long, radius_meters, num_points=4):
+    """
+    Generates points evenly spaced around a center point in a circle.
+
+    Args:
+        center_lat: Latitude of the center point.
+        center_long: Longitude of the center point.
+        radius_meters: Radius of the circle in meters.
+        num_points: Number of points to generate (default: 8).
+
+    Returns:
+        List of tuples containing latitude and longitude of the generated points.
+    """
+    points = []
+    for i in range(num_points):
+        bearing = i * (360 / num_points) 
+
+        # Calculate new point using geodesic distance and bearing
+        new_point = geodesic(meters=radius_meters).destination(
+            (center_lat, center_long), bearing
+        )
+        points.append((new_point.latitude, new_point.longitude, radius_meters))
+    return points
+
+
+
 if __name__ == '__main__':
 
     # get the project id from environment variable: 
@@ -72,7 +108,7 @@ if __name__ == '__main__':
     top_left, bottom_right = get_coordinates(project_id=project_id, version_id="latest")
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--n_steps", required=False, default=10)
+    parser.add_argument("--n_steps", required=False, default=5)
     
     args = parser.parse_args()
 
@@ -80,7 +116,18 @@ if __name__ == '__main__':
                                         string_to_tuple(bottom_right),
                                         int(args.n_steps))
 
-    restaurants = iterate_over_calls(lat_long_grid, project_id=project_id)
+    # pass over the grid
+    restaurants, saturated_list = iterate_over_calls(lat_long_grid, restaurants={}, project_id=project_id)
+    
+    # take the saturated list and generate 
+    points_list = []
+    for lat, long, radius in saturated_list:
+        points = generate_spoke_points(lat, long, radius)
+        points_list = points_list + points
+    
+    import ipdb; ipdb.set_trace();
+    
+    restaurants, _ = iterate_over_calls(points_list, restaurants=restaurants, project_id=project_id)
 
     update_json_and_save(new_data=restaurants, bucket_name=restaurant_bucket_name)
   

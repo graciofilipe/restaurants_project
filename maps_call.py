@@ -2,6 +2,8 @@ import requests
 import pandas as pd
 import os
 from datetime import datetime
+from geopy.distance import geodesic
+
 
 
 def send_request(lat, long, radius, rank, API_KEY):
