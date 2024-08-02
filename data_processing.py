@@ -3,6 +3,7 @@ from datetime import datetime
 import pandas as pd
 from google.cloud import storage
 from maps_call import send_request
+from aux_functions import access_secret_version
 
 
 
@@ -26,7 +27,7 @@ def iterate_over_calls(lat_long_pairs, restaurants, project_id):
                 if len(response_json['places']) == 20:
                     print(str(lat) + str(long) +' had 20 results')
 
-                    saturated_list.append((lat, long, radius/2))
+                    saturated_list.append((lat, long, radius))
                 else:
                     print(str(lat) + str(long) +' had 1-19 results')
                     for place in response_json['places']:

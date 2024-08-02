@@ -12,7 +12,7 @@ def check_coordinates_are_close_to_centre(API, lat, long, center, walking_thresh
     return walking_minutes < walking_threshold
 
 
-def generate_spoke_points(center_lat, center_long, radius_meters, num_points=4):
+def generate_spoke_points(center_lat, center_long, distance, num_points=6):
     """
     Generates points evenly spaced around a center point in a circle.
 
@@ -30,8 +30,8 @@ def generate_spoke_points(center_lat, center_long, radius_meters, num_points=4):
         bearing = i * (360 / num_points) 
 
         # Calculate new point using geodesic distance and bearing
-        new_point = geodesic(meters=radius_meters).destination(
+        new_point = geodesic(meters=distance).destination(
             (center_lat, center_long), bearing
         )
-        points.append((new_point.latitude, new_point.longitude, radius_meters))
+        points.append((new_point.latitude, new_point.longitude))
     return points
