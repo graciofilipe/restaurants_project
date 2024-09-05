@@ -16,6 +16,7 @@ if __name__ == '__main__':
     
     parser = argparse.ArgumentParser()
     parser.add_argument("--n_steps", required=False, default=11)
+    parser.add_argument("--radius", required=False, default=400)
     parser.add_argument("--maps_zone_name", required=True)
     
     args = parser.parse_args()
@@ -24,7 +25,8 @@ if __name__ == '__main__':
 
     lat_long_grid = build_lat_long_grid(string_to_tuple(top_left),
                                         string_to_tuple(bottom_right),
-                                        int(args.n_steps))
+                                        int(args.n_steps),
+                                        int(args.radius))
 
 
     # pass over the grid
