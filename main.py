@@ -13,16 +13,19 @@ if __name__ == '__main__':
     # get the project id from environment variable: 
     project_id = os.environ.get('PROJECT_ID')
     restaurant_bucket_name = get_bucket_name(project_id=project_id, version_id="latest")
-    top_left, bottom_right = get_coordinates(project_id=project_id, version_id="latest")
-
+    
     parser = argparse.ArgumentParser()
     parser.add_argument("--n_steps", required=False, default=11)
+    parser.add_argument("--maps_zone_name", required=True)
     
     args = parser.parse_args()
+
+    top_left, bottom_right = get_coordinates(project_id=project_id, version_id="latest", maps_zone_name=args.maps_zone_name)
 
     lat_long_grid = build_lat_long_grid(string_to_tuple(top_left),
                                         string_to_tuple(bottom_right),
                                         int(args.n_steps))
+
 
     # pass over the grid
     restaurants, saturated_list = iterate_over_calls(lat_long_grid, restaurants={}, project_id=project_id)

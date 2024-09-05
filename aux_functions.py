@@ -69,15 +69,21 @@ def get_bucket_name(project_id, version_id="latest"):
     return response.payload.data.decode("UTF-8")
 
 
-def get_coordinates(project_id, version_id="latest"):
+def get_coordinates(project_id, maps_zone_name, version_id="latest"):
 
     # Create the Secret Manager client.
     client = secretmanager.SecretManagerServiceClient()
-    
-    bottom_right = f"projects/{project_id}/secrets/restaurant_top_left/versions/{version_id}"
-    top_left_response = client.access_secret_version(request={"name": bottom_right})
 
-    bottom_right = f"projects/{project_id}/secrets/restaurant_bottom_right/versions/{version_id}"
+    zone = maps_zone_name
+
+    top_lef_secret_name = f'{zone}_top_left'
+    bottom_right_secret_name = f'{zone}_bottom_right'
+
+    top_left = f"projects/{project_id}/secrets/{top_lef_secret_name}/versions/{version_id}"
+    bottom_right = f"projects/{project_id}/secrets/{bottom_right_secret_name}/versions/{version_id}"
+
+
+    top_left_response = client.access_secret_version(request={"name": bottom_right})
     bottom_right_response = client.access_secret_version(request={"name": bottom_right})
 
 
