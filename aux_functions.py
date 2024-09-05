@@ -3,7 +3,7 @@ from google.cloud import storage
 
 
 
-def build_lat_long_grid(top_left, bottom_right, n_steps, raduis):
+def build_lat_long_grid(top_left, bottom_right, n_steps, radius):
 
     lat_step = (top_left[0] - bottom_right[0]) / n_steps
     long_step = (bottom_right[1] - top_left[1]) / n_steps
