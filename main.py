@@ -28,6 +28,7 @@ if __name__ == '__main__':
                                         int(args.n_steps),
                                         int(args.radius))
 
+    print('this is the lat long grid', lat_long_grid)
 
     # pass over the grid
     restaurants, saturated_list = iterate_over_calls(lat_long_grid, restaurants={}, project_id=project_id)
