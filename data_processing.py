@@ -35,7 +35,7 @@ def iterate_over_calls(lat_long_pairs, restaurants, project_id):
                     for place in response_json['places']:
                         restaurants[place['id']] = {
                             'displayName': place['displayName']['text'],
-                            'shortFormattedAddress': place['shortFormattedAddress'],
+                            'shortFormattedAddress': place.get('shortFormattedAddress', 'NA'),
                             'rating': place.get('rating', 0),
                             'priceLevel': place.get('priceLevel', "NA"),
                             'last_seen': formatted_date,
