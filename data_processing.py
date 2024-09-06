@@ -17,6 +17,8 @@ def iterate_over_calls(lat_long_pairs, restaurants, project_id):
     formatted_date = today.strftime("%Y-%m-%d")
 
     for rank in ["DISTANCE", "POPULARITY"]:
+        print(f'starting the {rank} based analysis')
+
         for lat, long, radius in lat_long_pairs:
 
             response_json = send_request(lat, long, radius, rank, API_KEY)
