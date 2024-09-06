@@ -1,3 +1,8 @@
+from google.cloud import secretmanager
+from google.cloud import storage
+
+
+
 def build_lat_long_grid(top_left, bottom_right, n_steps, radius):
 
     lat_step = (top_left[0] - bottom_right[0]) / n_steps
@@ -8,10 +13,13 @@ def build_lat_long_grid(top_left, bottom_right, n_steps, radius):
             lat = top_left[0] - i * lat_step
             long = top_left[1] + j * long_step
             lat_long_pairs.append((lat, long, radius))
-    
+        
     assert len(lat_long_pairs) == len(set(lat_long_pairs)), "Generated grid contains duplicate points"
 
-    return lat_long_pairs(string):
+    return lat_long_pairs
+
+
+def string_to_tuple(string):
     """
     Converts a string in the format "(number, number)" to a tuple of floats.
 
