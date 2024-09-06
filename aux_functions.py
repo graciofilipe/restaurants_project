@@ -85,7 +85,7 @@ def get_coordinates(project_id, maps_zone_name, version_id="latest"):
     bottom_right = f"projects/{project_id}/secrets/{bottom_right_secret_name}/versions/{version_id}"
 
 
-    top_left_response = client.access_secret_version(request={"name": bottom_right})
+    top_left_response = client.access_secret_version(request={"name": top_left})
     bottom_right_response = client.access_secret_version(request={"name": bottom_right})
 
 
