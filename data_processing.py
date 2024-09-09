@@ -7,6 +7,7 @@ from aux_functions import access_secret_version
 
 
 
+
 def iterate_over_calls(lat_long_pairs, restaurants, project_id):
 
     API_KEY= access_secret_version(project_id=project_id, secret_id='maps-key')
