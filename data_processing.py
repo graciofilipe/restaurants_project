@@ -16,7 +16,7 @@ def iterate_over_calls(lat_long_pairs, restaurants, project_id):
     today = datetime.today()
     formatted_date = today.strftime("%Y-%m-%d")
 
-    for rank in ["DISTANCE", "POPULARITY"]:
+    for rank in ["DISTANCE"]:
         print(f'starting the {rank} based analysis')
 
         for lat, long, radius in lat_long_pairs:
