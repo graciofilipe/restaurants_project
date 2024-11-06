@@ -18,8 +18,8 @@ steps:
       - run
       - jobs
       - deploy
-      - restaurants-job
-      - --image=europe-docker.pkg.dev/$PROJECT_ID/restaurants/restaurants-finder-image:latest
+      - restaurant-finder-job
+      - --image=europe-docker.pkg.dev/$PROJECT_ID/restaurants/restaurant-finder-image:latest
       - --region=europe-west1
       - --cpu=2
       - --memory=2Gi
