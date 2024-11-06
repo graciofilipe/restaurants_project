@@ -50,7 +50,7 @@ if __name__ == '__main__':
     
     parser = argparse.ArgumentParser()
     parser.add_argument("--date_cutoff", required=True)
-    parser.add_argument("--file_name", required=True)
+    parser.add_argument("--file_name", required=False, default='restaurants.json')
     
     args = parser.parse_args()
 
