@@ -11,6 +11,7 @@ steps:
     args:
       - push
       - 'europe-docker.pkg.dev/$PROJECT_ID/restaurants/restaurants-finder-image:latest'
+      - 'run_restaurant_finder/'
     env:
       - PROJECT_ID=$PROJECT_ID
   - name: 'gcr.io/cloud-builders/gcloud'
