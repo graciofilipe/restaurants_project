@@ -7,7 +7,6 @@ import os
 
 
 
-
 if __name__ == '__main__':
 
     # get the project id from environment variable: 
