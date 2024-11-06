@@ -11,13 +11,13 @@ def send_request(lat, long, radius, rank, API_KEY):
     }
     data = {
     "rankPreference": rank,
-    "includedPrimaryTypes": ["american_restaurant", "barbecue_restaurant", "brazilian_restaurant", \
-        "chinese_restaurant",  "french_restaurant", "greek_restaurant", "hamburger_restaurant", \
-        "indian_restaurant" , "indonesian_restaurant", "italian_restaurant", "japanese_restaurant", \
-        "korean_restaurant", "lebanese_restaurant", "mediterranean_restaurant", "mexican_restaurant", \
+    "includedPrimaryTypes": ["american_restaurant", "barbecue_restaurant", "brazilian_restaurant",
+        "chinese_restaurant",  "french_restaurant", "greek_restaurant", "hamburger_restaurant",
+        "indian_restaurant" , "indonesian_restaurant", "italian_restaurant", "japanese_restaurant",
+        "korean_restaurant", "lebanese_restaurant", "mediterranean_restaurant", "mexican_restaurant",
         "middle_eastern_restaurant", "pizza_restaurant",  "ramen_restaurant", "restaurant", 
-        "seafood_restaurant", "spanish_restaurant", "steak_house", "sushi_restaurant", "thai_restaurant", \
-        "turkish_restaurant", "vegetarian_restaurant" "vietnamese_restaurant"]
+        "seafood_restaurant", "spanish_restaurant", "steak_house", "sushi_restaurant", "thai_restaurant",
+        "turkish_restaurant", "vegetarian_restaurant", "vietnamese_restaurant"]
     
     "excludedPrimaryTypes": ["meal_delivery", "meal_takeaway", "fast_food_restaurant",
      "bar", "bakery", "cafe", "coffee_shop", "breakfast_restaurant", 
