@@ -4,7 +4,7 @@ steps:
       - build
       - '-t'
       - 'europe-docker.pkg.dev/$PROJECT_ID/restaurants/restaurant-finder-image:latest'
-      - '.'
+      - 'run_restaurant_finder/'
     env:
       - PROJECT_ID=$PROJECT_ID
   - name: 'gcr.io/cloud-builders/docker'
