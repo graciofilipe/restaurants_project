@@ -1,7 +1,7 @@
 import json
 from datetime import datetime, timedelta
 from google.cloud import storage
-from common_utils.aux_functions import get_bucket_name
+from aux_functions import get_bucket_name
 import argparse
 import os
 
