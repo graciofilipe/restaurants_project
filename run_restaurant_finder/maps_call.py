@@ -17,13 +17,14 @@ def send_request(lat, long, radius, rank, API_KEY):
         "korean_restaurant", "lebanese_restaurant", "mediterranean_restaurant", "mexican_restaurant",
         "middle_eastern_restaurant", "pizza_restaurant",  "ramen_restaurant", "restaurant", 
         "seafood_restaurant", "spanish_restaurant", "steak_house", "sushi_restaurant", "thai_restaurant",
-        "turkish_restaurant", "vegetarian_restaurant", "vietnamese_restaurant"]
-    
+        "turkish_restaurant", "vegetarian_restaurant", "vietnamese_restaurant"
+        ],
     "excludedPrimaryTypes": ["meal_delivery", "meal_takeaway", "fast_food_restaurant",
-     "bar", "bakery", "cafe", "coffee_shop", "breakfast_restaurant", 
-     "ice_cream_shop", "sandwich_shop", "brunch_restaurant", "vegan_restaurant"]
+        "bar", "bakery", "cafe", "coffee_shop", "breakfast_restaurant", ,
+        "ice_cream_shop", "sandwich_shop", "brunch_restaurant", "vegan_restaurant"
+        ],
     "excludedTypes": ["bakery", "bar", "cafe", "coffee_shop", "breakfast_restaurant", 
-     "ice_cream_shop", "sandwich_shop", "brunch_restaurant", "vegan_restaurant"]
+        "ice_cream_shop", "sandwich_shop", "brunch_restaurant", "vegan_restaurant"],
     "locationRestriction": {
         "circle": {
         "center": {
