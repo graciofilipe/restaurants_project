@@ -34,9 +34,6 @@ def iterate_over_calls(lat_long_pairs, restaurants, project_id):
                 else:
                     print(str(lat) + str(long) +' had 1-19 results')
                     for place in response_json['places']:
-                        print('place print')
-                        print(place)
-                        print('\n')
                         restaurants[place['id']] = {
                             'displayName': place['displayName']['text'],
                             'shortFormattedAddress': place.get('shortFormattedAddress', 'NA'),
@@ -46,7 +43,7 @@ def iterate_over_calls(lat_long_pairs, restaurants, project_id):
                             'primary_type': place.get('primaryType', 'NA'),
                             'user_rating_count': place.get('userRatingCount', 'NA'),
                             'types': place.get('types', 'NA')
--                        }
+                        }
 
     return restaurants, saturated_list
 
