@@ -1,4 +1,4 @@
-from data_processing import iterate_over_calls, update_json_and_save
+from data_processing import iterate_over_calls, update_json_and_save, upload_restaurants_to_bigquery
 from aux_functions import get_bucket_name, get_coordinates, build_lat_long_grid, string_to_tuple
 from geo_functions import generate_spoke_points
 import argparse
@@ -46,6 +46,8 @@ if __name__ == '__main__':
     print('after expended list we found a TOTAL', str(len(restaurants)), ' restaurants')
 
     update_json_and_save(new_data=restaurants, bucket_name=restaurant_bucket_name)
+    upload_restaurants_to_bigquery(concatenated_dict=restaurants, project_id=project_id)
+
   
 
 

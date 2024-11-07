@@ -4,6 +4,7 @@ import pandas as pd
 from google.cloud import storage
 from maps_call import send_request
 from aux_functions import access_secret_version
+from google.cloud import bigquery
 
 
 
@@ -41,8 +42,8 @@ def iterate_over_calls(lat_long_pairs, restaurants, project_id):
                             'priceLevel': place.get('priceLevel', 'NA'),
                             'last_seen': formatted_date,
                             'primary_type': place.get('primaryType', 'NA'),
-                            'user_rating_count': place.get('userRatingCount', 'NA'),
-                            'types': place.get('types', 'NA')
+                            'user_rating_count': place.get('userRatingCount', 0),
+                            'types': place.get('types', [])
                         }
 
     return restaurants, saturated_list
@@ -109,6 +110,66 @@ def update_json_and_save(new_data, bucket_name):
 
     blob = bucket.blob(f'restaurants.json')
     blob.upload_from_string(json.dumps(concatenated_dict), content_type='application/json')
+
+
+    def upload_restaurants_to_bigquery(concatenated_dict, project_id):
+        client = bigquery.Client(project=project_id)
+        dataset_id = 'restaurant_dataset'
+        table_id = 'restaurants_table'
+        dataset_ref = client.dataset(dataset_id)
+
+        table_id = f"{project_id}.{dataset_id}.{table_id}"
+        try:
+            client.get_table(table_ref)
+            client.delete_table(table_ref)
+            print(f"Table {table_id} deleted successfully.")
+        except Exception as e:
+            print(f"Table {table_id} does not exist. Creating a new table.")
+
+        schema = [
+            bigquery.SchemaField("restaurant_id", "STRING", mode="REQUIRED"),
+            bigquery.SchemaField("displayName", "STRING", mode="NULLABLE"),
+            bigquery.SchemaField("shortFormattedAddress", "STRING", mode="NULLABLE"),
+            bigquery.SchemaField("rating", "FLOAT", mode="NULLABLE"),
+            bigquery.SchemaField("priceLevel", "INTEGER", mode="NULLABLE"),
+            bigquery.SchemaField("last_seen", "DATE", mode="NULLABLE"),
+            bigquery.SchemaField("first_seen", "DATE", mode="NULLABLE"),
+            bigquery.SchemaField("primary_type", "STRING", mode="NULLABLE"),
+            bigquery.SchemaField("user_rating_count", "INTEGER", mode="NULLABLE"),
+            bigquery.SchemaField("types", "STRING", mode="REPEATED")
+        ]
+
+        table = bigquery.Table(table_ref, schema=schema)
+        table = client.create_table(table)  # Make an API request.
+        print(f"Created table {table.project}.{table.dataset_id}.{table.table_id}")
+
+        table_ref = dataset_ref.table(table_id)
+
+        rows_to_insert = []
+        for restaurant_id, restaurant_data in concatenated_dict.items():
+            row = {
+                'restaurant_id': restaurant_id,
+                'displayName': restaurant_data.get('displayName', None),
+                'shortFormattedAddress': restaurant_data.get('shortFormattedAddress', None),
+                'rating': restaurant_data.get('rating', None),
+                'priceLevel': restaurant_data.get('priceLevel', None),
+                'last_seen': restaurant_data.get('last_seen', None),
+                'first_seen': restaurant_data.get('first_seen', None),
+                'primary_type': restaurant_data.get('primary_type', None),
+                'user_rating_count': restaurant_data.get('user_rating_count', None),
+                'types': restaurant_data.get('types', None)
+            }
+            rows_to_insert.append(row)
+
+        try:
+            errors = client.insert_rows_json(table_ref, rows_to_insert)
+            if errors == []:
+                print("New rows have been added.")
+            else:
+                print(f"Encountered errors while inserting rows: {errors}")
+        except Exception as e:
+            print(f"An error occurred: {e}")
+
 
 
 
