@@ -97,15 +97,15 @@ def upload_restaurants_to_bigquery(concatenated_dict, project_id):
     for restaurant_id, restaurant_data in concatenated_dict.items():
         row = {
             'restaurant_id': restaurant_id,
-            'displayName': restaurant_data.get('displayName', None),
-            'shortFormattedAddress': restaurant_data.get('shortFormattedAddress', None),
-            'rating': restaurant_data.get('rating', None),
-            'priceLevel': restaurant_data.get('priceLevel', None),
+            'displayName': restaurant_data.get('displayName', 'NA'),
+            'shortFormattedAddress': restaurant_data.get('shortFormattedAddress', 'NA'),
+            'rating': restaurant_data.get('rating', 0),
+            'priceLevel': restaurant_data.get('priceLevel', 'NA'),
             'last_seen': restaurant_data.get('last_seen', None),
             'first_seen': restaurant_data.get('first_seen', None),
             'primary_type': restaurant_data.get('primary_type', None),
-            'user_rating_count': restaurant_data.get('user_rating_count', None),
-            'types': restaurant_data.get('types', None)
+            'user_rating_count': restaurant_data.get('user_rating_count', 0),
+            'types': restaurant_data.get('types', [''])
         }
         rows_to_insert.append(row)
 
