@@ -7,7 +7,7 @@ def send_request(lat, long, radius, rank, API_KEY):
     headers = {
     'Content-Type': 'application/json',
     'X-Goog-Api-Key': API_KEY,
-    'X-Goog-FieldMask': 'places.displayName,places.id,places.shortFormattedAddress,places.priceLevel,places.rating,places.primaryType,places.userRatingCount'
+    'X-Goog-FieldMask': 'places.displayName,places.id,places.shortFormattedAddress,places.priceLevel,places.rating,places.primaryType,places.userRatingCount,places.types'
     }
     data = {
     "rankPreference": rank,
