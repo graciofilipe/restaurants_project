@@ -45,8 +45,7 @@ if __name__ == '__main__':
 
     print('after expended list we found a TOTAL', str(len(restaurants)), ' restaurants')
 
-    update_json_and_save(new_data=restaurants, bucket_name=restaurant_bucket_name)
-    upload_restaurants_to_bigquery(concatenated_dict=restaurants, project_id=project_id)
+    update_json_and_save(new_data=restaurants, bucket_name=restaurant_bucket_name, project_id=project_id)
 
   
 

@@ -60,57 +60,6 @@ def read_old_restaurants(bucket_name):
     return data
 
 
-def update_json_and_save(new_data, bucket_name):
-    json_old = read_old_restaurants(bucket_name)
-    
-    new_restaurants = {}
-    for restaurant_id, restaurant_data in new_data.items():
-        
-        #case one, the restaurant is new
-        if restaurant_id not in json_old:
-            new_restaurants[restaurant_id] = restaurant_data
-            new_restaurants[restaurant_id]['first_seen'] = new_restaurants[restaurant_id]['last_seen']
-
-        #case two, the restaurant has been seen before
-        else:
-            # update the rating
-            json_old[restaurant_id]['rating'] = restaurant_data['rating']
-            # update the address
-            json_old[restaurant_id]['shortFormattedAddress'] = restaurant_data['shortFormattedAddress']
-            # update the price level
-            json_old[restaurant_id]['priceLevel'] = restaurant_data['priceLevel']
-            # update the last_seen
-            json_old[restaurant_id]['last_seen'] = restaurant_data['last_seen']
-            # update the primary_type
-            json_old[restaurant_id]['primary_type'] = restaurant_data['primary_type']
-            # update the user_rating_count
-            json_old[restaurant_id]['user_rating_count'] = restaurant_data['user_rating_count']
-            # update the types
-            json_old[restaurant_id]['types'] = restaurant_data['types']
-
-      
-
-    print("** new restaurants **")
-    print(new_restaurants)
-
-
-    # Create a new dictionary to store the concatenated results
-    concatenated_dict = json_old.copy()
-
-    # Update the concatenated dictionary with values from dict2
-    concatenated_dict.update(new_restaurants)
-
-
-    # write json_old and new_restaurants into cloud storage:
-    storage_client = storage.Client()
-    bucket = storage_client.bucket(bucket_name)
-
-    blob = bucket.blob(f'restaurants_{datetime.now().strftime("%Y%m%d_%H%M%S")}.json')
-    blob.upload_from_string(json.dumps(new_restaurants), content_type='application/json')
-
-    blob = bucket.blob(f'restaurants.json')
-    blob.upload_from_string(json.dumps(concatenated_dict), content_type='application/json')
-
 
 def upload_restaurants_to_bigquery(concatenated_dict, project_id):
     client = bigquery.Client(project=project_id)
@@ -172,16 +121,57 @@ def upload_restaurants_to_bigquery(concatenated_dict, project_id):
 
 
 
+def update_json_and_save(new_data, bucket_name, project_id):
+    json_old = read_old_restaurants(bucket_name)
+    
+    new_restaurants = {}
+    for restaurant_id, restaurant_data in new_data.items():
+        
+        #case one, the restaurant is new
+        if restaurant_id not in json_old:
+            new_restaurants[restaurant_id] = restaurant_data
+            new_restaurants[restaurant_id]['first_seen'] = new_restaurants[restaurant_id]['last_seen']
+
+        #case two, the restaurant has been seen before
+        else:
+            # update the rating
+            json_old[restaurant_id]['rating'] = restaurant_data['rating']
+            # update the address
+            json_old[restaurant_id]['shortFormattedAddress'] = restaurant_data['shortFormattedAddress']
+            # update the price level
+            json_old[restaurant_id]['priceLevel'] = restaurant_data['priceLevel']
+            # update the last_seen
+            json_old[restaurant_id]['last_seen'] = restaurant_data['last_seen']
+            # update the primary_type
+            json_old[restaurant_id]['primary_type'] = restaurant_data['primary_type']
+            # update the user_rating_count
+            json_old[restaurant_id]['user_rating_count'] = restaurant_data['user_rating_count']
+            # update the types
+            json_old[restaurant_id]['types'] = restaurant_data['types']
+
+      
+
+    print("** new restaurants **")
+    print(new_restaurants)
 
 
+    # Create a new dictionary to store the concatenated results
+    concatenated_dict = json_old.copy()
+
+    # Update the concatenated dictionary with values from dict2
+    concatenated_dict.update(new_restaurants)
 
 
+    # write json_old and new_restaurants into cloud storage:
+    storage_client = storage.Client()
+    bucket = storage_client.bucket(bucket_name)
 
+    blob = bucket.blob(f'restaurants_{datetime.now().strftime("%Y%m%d_%H%M%S")}.json')
+    blob.upload_from_string(json.dumps(new_restaurants), content_type='application/json')
 
-
-
-
-
+    blob = bucket.blob(f'restaurants.json')
+    blob.upload_from_string(json.dumps(concatenated_dict), content_type='application/json')
+    upload_restaurants_to_bigquery(concatenated_dict, project_id)
 
 
 
