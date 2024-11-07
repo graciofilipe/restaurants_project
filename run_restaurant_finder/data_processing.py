@@ -80,6 +80,12 @@ def update_json_and_save(new_data, bucket_name):
             json_old[restaurant_id]['priceLevel'] = restaurant_data['priceLevel']
             # update the last_seen
             json_old[restaurant_id]['last_seen'] = restaurant_data['last_seen']
+            # update the primary_type
+            json_old[restaurant_id]['primary_type'] = restaurant_data['primary_type']
+            # update the user_rating_count
+            json_old[restaurant_id]['user_rating_count'] = restaurant_data['user_rating_count']
+            # update the types
+            json_old[restaurant_id]['types'] = restaurant_data['types']
 
       
 
