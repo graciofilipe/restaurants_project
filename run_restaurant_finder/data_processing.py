@@ -67,8 +67,9 @@ def upload_restaurants_to_bigquery(concatenated_dict, project_id):
     table_id = 'restaurants_table'
     dataset_ref = client.dataset(dataset_id)
     table_ref = f"{project_id}.{dataset_id}.{table_id}"
+
     try:
-        client.get_table(table_ref)
+        # client.get_table(table_ref)
         client.delete_table(table_ref)
         print(f"Table {table_id} deleted successfully.")
     except Exception as e:
@@ -90,7 +91,6 @@ def upload_restaurants_to_bigquery(concatenated_dict, project_id):
     table = bigquery.Table(table_ref, schema=schema)
     table = client.create_table(table)  # Make an API request.
     print(f"Created table {table.project}.{table.dataset_id}.{table.table_id}")
-
     table_ref = dataset_ref.table(table_id)
 
     rows_to_insert = []
