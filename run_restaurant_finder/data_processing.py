@@ -40,7 +40,9 @@ def iterate_over_calls(lat_long_pairs, restaurants, project_id):
                             'rating': place.get('rating', 0),
                             'priceLevel': place.get('priceLevel', "NA"),
                             'last_seen': formatted_date,
-                        }
+                            'primary_type': place.get('primaryType', 'NA'),
+                            'user_rating_count': place.get('userRatingCount', 'NA')
+-                        }
 
     return restaurants, saturated_list
 
