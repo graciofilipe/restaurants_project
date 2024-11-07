@@ -117,8 +117,7 @@ def upload_restaurants_to_bigquery(concatenated_dict, project_id):
     dataset_id = 'restaurant_dataset'
     table_id = 'restaurants_table'
     dataset_ref = client.dataset(dataset_id)
-
-    table_id = f"{project_id}.{dataset_id}.{table_id}"
+    table_ref = f"{project_id}.{dataset_id}.{table_id}"
     try:
         client.get_table(table_ref)
         client.delete_table(table_ref)
