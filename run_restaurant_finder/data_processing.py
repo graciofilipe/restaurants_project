@@ -130,7 +130,7 @@ def upload_restaurants_to_bigquery(concatenated_dict, project_id):
         bigquery.SchemaField("displayName", "STRING", mode="NULLABLE"),
         bigquery.SchemaField("shortFormattedAddress", "STRING", mode="NULLABLE"),
         bigquery.SchemaField("rating", "FLOAT", mode="NULLABLE"),
-        bigquery.SchemaField("priceLevel", "INTEGER", mode="NULLABLE"),
+        bigquery.SchemaField("priceLevel", "STRING", mode="NULLABLE"),
         bigquery.SchemaField("last_seen", "DATE", mode="NULLABLE"),
         bigquery.SchemaField("first_seen", "DATE", mode="NULLABLE"),
         bigquery.SchemaField("primary_type", "STRING", mode="NULLABLE"),
