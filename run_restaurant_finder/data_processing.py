@@ -114,7 +114,7 @@ def update_json_and_save(new_data, bucket_name):
 
 def upload_restaurants_to_bigquery(concatenated_dict, project_id):
     client = bigquery.Client(project=project_id)
-    dataset_id = 'restaurant_dataset'
+    dataset_id = 'restaurants_dataset'
     table_id = 'restaurants_table'
     dataset_ref = client.dataset(dataset_id)
     table_ref = f"{project_id}.{dataset_id}.{table_id}"

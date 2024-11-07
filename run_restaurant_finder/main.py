@@ -15,7 +15,7 @@ if __name__ == '__main__':
     
     parser = argparse.ArgumentParser()
     parser.add_argument("--n_steps", required=False, default=3)
-    parser.add_argument("--radius", required=False, default=6666)
+    parser.add_argument("--radius", required=False, default=666)
     parser.add_argument("--maps_zone_name", required=True)
     
     args = parser.parse_args()
