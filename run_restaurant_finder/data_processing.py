@@ -76,16 +76,16 @@ def upload_restaurants_to_bigquery(concatenated_dict, project_id):
         print(f"Table {table_id} does not exist. Creating a new table.")
 
     schema = [
-        bigquery.SchemaField("restaurant_id", "STRING", mode="REQUIRED"),
-        bigquery.SchemaField("displayName", "STRING", mode="NULLABLE"),
-        bigquery.SchemaField("shortFormattedAddress", "STRING", mode="NULLABLE"),
-        bigquery.SchemaField("rating", "FLOAT", mode="NULLABLE"),
-        bigquery.SchemaField("priceLevel", "STRING", mode="NULLABLE"),
-        bigquery.SchemaField("last_seen", "DATE", mode="NULLABLE"),
-        bigquery.SchemaField("first_seen", "DATE", mode="NULLABLE"),
-        bigquery.SchemaField("primary_type", "STRING", mode="NULLABLE"),
-        bigquery.SchemaField("user_rating_count", "INTEGER", mode="NULLABLE"),
-        bigquery.SchemaField("types", "STRING", mode="REPEATED")
+        bigquery.SchemaField("restaurant_id", "STRING", mode="REQUIRED", description="Unique identifier for the restaurant"),
+        bigquery.SchemaField("displayName", "STRING", mode="NULLABLE", description="Name of the restaurant"),
+        bigquery.SchemaField("shortFormattedAddress", "STRING", mode="NULLABLE", description= "Address of the restaurant"),
+        bigquery.SchemaField("rating", "FLOAT", mode="NULLABLE", description="Average rating of the restaurant"),
+        bigquery.SchemaField("priceLevel", "STRING", mode="NULLABLE", description="Price level of the restaurant - categorical variable"),
+        bigquery.SchemaField("last_seen", "DATE", mode="NULLABLE", description="Date when the restaurant was last seen active"),
+        bigquery.SchemaField("first_seen", "DATE", mode="NULLABLE", description="Date when the restaurant was first seen active"),
+        bigquery.SchemaField("primary_type", "STRING", mode="NULLABLE", description="Primary type of the restaurant (for example, restaurant, or italian_restaurant)"),
+        bigquery.SchemaField("user_rating_count", "INTEGER", mode="NULLABLE", description="Number of users who rated the restaurant"),
+        bigquery.SchemaField("types", "STRING", mode="REPEATED", description="A list of types associated with the restaurant - for example italian_restaurant or indonesian_restaurant - each restaurant can have multiple types")
     ]
 
     table = bigquery.Table(table_ref, schema=schema)
