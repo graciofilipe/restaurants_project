@@ -11,20 +11,22 @@ def send_request(lat, long, radius, rank, API_KEY):
     }
     data = {
     "rankPreference": rank,
-    "includedPrimaryTypes": ["american_restaurant", "barbecue_restaurant", "brazilian_restaurant",
-        "chinese_restaurant",  "french_restaurant", "greek_restaurant", "hamburger_restaurant",
-        "indian_restaurant" , "indonesian_restaurant", "italian_restaurant", "japanese_restaurant",
-        "korean_restaurant", "lebanese_restaurant", "mediterranean_restaurant", "mexican_restaurant",
-        "middle_eastern_restaurant", "pizza_restaurant",  "ramen_restaurant", "restaurant", 
-        "seafood_restaurant", "spanish_restaurant", "steak_house", "sushi_restaurant", "thai_restaurant",
-        "turkish_restaurant", "vegetarian_restaurant", "vietnamese_restaurant"
-        ],
-    "excludedPrimaryTypes": ["meal_delivery", "meal_takeaway", "fast_food_restaurant",
-        "bar", "bakery", "cafe", "coffee_shop", "breakfast_restaurant",
-        "ice_cream_shop", "sandwich_shop", "brunch_restaurant", "vegan_restaurant"
-        ],
-    "excludedTypes": ["bakery", "bar", "cafe", "coffee_shop", "breakfast_restaurant", 
-        "ice_cream_shop", "sandwich_shop", "brunch_restaurant", "vegan_restaurant"],
+    "includedPrimaryTypes": ["afghani_restaurant", "african_restaurant", "american_restaurant", "asian_restaurant",
+        "barbecue_restaurant", "brazilian_restaurant", "buffet_restaurant", "chinese_restaurant", "french_restaurant",
+        "greek_restaurant", "hamburger_restaurant", "indian_restaurant", "indonesian_restaurant", "italian_restaurant",
+        "japanese_restaurant", "korean_restaurant", "lebanese_restaurant", "mediterranean_restaurant", "mexican_restaurant",
+        "middle_eastern_restaurant", "pizza_restaurant", "ramen_restaurant", "restaurant", "seafood_restaurant",
+        "spanish_restaurant", "steak_house", "sushi_restaurant", "thai_restaurant", 
+        "turkish_restaurant", "vegetarian_restaurant", "vietnamese_restaurant"],
+    "excludedPrimaryTypes": ["acai_shop", "bagel_shop", "bakery", "bar", "bar_and_grill", "breakfast_restaurant",
+        "brunch_restaurant", "cafe", "cafeteria", "candy_store", "cat_cafe", "chocolate_factory", "chocolate_shop", "coffee_shop",
+        "confectionery", "deli", "dessert_restaurant", "dessert_shop", "dog_cafe", "donut_shop", "fast_food_restaurant",
+        "fine_dining_restaurant", "food_court", "ice_cream_shop", "juice_shop", "meal_delivery", "meal_takeaway", "pub",
+        "sandwich_shop", "tea_house", "vegan_restaurant", "wine_bar"],
+    "excludedTypes": ["acai_shop", "bagel_shop", "bakery", "bar", "candy_store", "cat_cafe", "chocolate_factory", 
+        "chocolate_shop", "coffee_shop", "deli", "dessert_restaurant", "dessert_shop", "dog_cafe", "donut_shop",
+        "fast_food_restaurant", "food_court", "ice_cream_shop", "juice_shop", "meal_delivery", "meal_takeaway", "pub",
+        "sandwich_shop", "tea_house","wine_bar"],
     "locationRestriction": {
         "circle": {
         "center": {
