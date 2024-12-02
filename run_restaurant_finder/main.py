@@ -1,5 +1,5 @@
 from data_processing import iterate_over_calls, update_json_and_save, upload_restaurants_to_bigquery
-from aux_functions import get_bucket_name, get_coordinates, build_lat_long_grid, string_to_tuple, get_latlong_from_bucket
+from aux_functions import get_bucket_name, string_to_tuple, get_latlong_from_bucket
 from geo_functions import generate_spoke_points
 import argparse
 from datetime import datetime
@@ -18,8 +18,6 @@ if __name__ == '__main__':
     parser.add_argument("--latlong_list", required=False, default="postcodes/latlong.csv")
     parser.add_argument("--limit", required=False, default=20)
     parser.add_argument("--latlong_resolution", required=False, default=1)
-
-    
     args = parser.parse_args()
 
     latlong_list = get_latlong_from_bucket(project_id=project_id,
@@ -28,11 +26,8 @@ if __name__ == '__main__':
                                            latlong_resolution=args.latlong_resolution,
                                            radius=args.radius)
 
-
-
     n_points = len(latlong_list)
      
-
     if n_points > args.limit:
         print(f"number of points {n_points} is above the set limit of {args.limit}")
         print("going to randomly sample the points")
@@ -43,14 +38,13 @@ if __name__ == '__main__':
         sampled_latlong_list = [latlong_list[i] for i in random_indices]
         latlong_list = sampled_latlong_list
         
+
     print('this is the lat long grid', latlong_list)
     print('the saturated_list has ', str(len(latlong_list)), ' elements')
 
-    
     # pass over the grid
     restaurants, saturated_list = iterate_over_calls(latlong_list, restaurants={}, project_id=project_id)
     print('after first grid we found ', str(len(restaurants)), ' restaurants')
-
     print('the saturated_list has ', str(len(saturated_list)), ' elements')
 
     # take the saturated list and generate 
