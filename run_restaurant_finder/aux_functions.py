@@ -30,10 +30,6 @@ def get_latlong_from_bucket(project_id,
 
     import pandas as pd
     import numpy as np
-    print('bucket name', bucket_name)
-    print('latlong list file:', latlong_list)
-    print('latlong resolution', latlong_resolution)
-
 
     # use pandas to download csv from gcs bucket
     df = pd.read_csv(f"gs://{bucket_name}/{latlong_list}", header=0)
@@ -46,7 +42,6 @@ def get_latlong_from_bucket(project_id,
     # deduplucate the latlong_list
     latlong_list = list(set(latlong_list))
 
-    print('the actual list of latlongs and radiuses is', latlong_list)
 
     return latlong_list
 
