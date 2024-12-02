@@ -1,5 +1,5 @@
 from data_processing import iterate_over_calls, update_json_and_save, upload_restaurants_to_bigquery
-from aux_functions import get_bucket_name, get_coordinates, build_lat_long_grid, string_to_tuple
+from aux_functions import get_bucket_name, get_coordinates, build_lat_long_grid, string_to_tuple, get_latlong_from_bucket
 from geo_functions import generate_spoke_points
 import argparse
 from datetime import datetime
@@ -16,16 +16,26 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("--n_steps", required=False, default=3)
     parser.add_argument("--radius", required=False, default=666)
-    parser.add_argument("--maps_zone_name", required=True)
+    #parser.add_argument("--maps_zone_name", required=True)
+    #parser.add_argument("--list_of_latlong", required=True, default="")
+    parser.add_argument("--latlong_resolution", required=False, default=0)
+
     
     args = parser.parse_args()
 
-    top_left, bottom_right = get_coordinates(project_id=project_id, version_id="latest", maps_zone_name=args.maps_zone_name)
+    #top_left, bottom_right = get_coordinates(project_id=project_id, version_id="latest", maps_zone_name=args.maps_zone_name)
 
-    lat_long_grid = build_lat_long_grid(string_to_tuple(top_left),
-                                        string_to_tuple(bottom_right),
-                                        int(args.n_steps),
-                                        int(args.radius))
+    #lat_long_grid = build_lat_long_grid(string_to_tuple(top_left),
+    #                                    string_to_tuple(bottom_right),
+    #                                    int(args.n_steps),
+    #                                    int(args.radius))
+
+    latlong_list = get_latlong_from_bucket(project_id=project_id,
+                                           bucket_name=restaurant_bucket_name, 
+                                           latlong_resolution=args.latlong_resoltuion,
+                                           radius=args.radius)
+
+
 
     print('this is the lat long grid', lat_long_grid)
 

@@ -1,5 +1,6 @@
 from google.cloud import secretmanager
 from google.cloud import storage
+import numpy as np
 
 
 
@@ -17,6 +18,26 @@ def build_lat_long_grid(top_left, bottom_right, n_steps, radius):
     assert len(lat_long_pairs) == len(set(lat_long_pairs)), "Generated grid contains duplicate points"
 
     return lat_long_pairs
+
+
+
+
+def get_latlong_from_bucket(project_id=project_id, bucket_name=restaurant_bucket_name,
+                            latlong_resolution=latlong_resoltuion, radius=radius):
+    # get csv file from bucket in pandas format
+    storage_client = storage.Client()
+    bucket = storage_client.bucket(bucket_name)
+    blob = bucket.blob(f'latlong.csv')
+    csv_file = pd.read_csv(blob.download_as_string().decode('utf-8'))
+
+    latlong_list = [(np.round(row.LAT, latlong_resolution),
+                     np.round(row.LONG, latlong_resolution),
+                     radius) 
+                    for index, row in csv_file.iterrows()]
+
+    return latlong_list
+
+
 
 
 def string_to_tuple(string):
