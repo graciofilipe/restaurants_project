@@ -28,19 +28,19 @@ if __name__ == '__main__':
 
     n_points = len(latlong_list)
      
-    if n_points > args.limit:
+    if n_points > int(args.limit):
         print(f"number of points {n_points} is above the set limit of {args.limit}")
         print("going to randomly sample the points")
 
         # extract a random args.limit number of points from latlong_list
         import random
-        random_indices = random.sample(range(n_points), args.limit)
+        random_indices = random.sample(range(n_points), int(args.limit))
         sampled_latlong_list = [latlong_list[i] for i in random_indices]
         latlong_list = sampled_latlong_list
         
 
     print('this is the lat long grid', latlong_list)
-    print('the saturated_list has ', str(len(latlong_list)), ' elements')
+    print('the latlong_list has ', str(len(latlong_list)), ' elements')
 
     # pass over the grid
     restaurants, saturated_list = iterate_over_calls(latlong_list, restaurants={}, project_id=project_id)
