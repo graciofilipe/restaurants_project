@@ -32,10 +32,10 @@ def get_latlong_from_bucket(project_id,
     import numpy as np
 
     # use pandas to download csv from gcs bucket
-    df = pd.read_csv(f"gs://{bucket_name}/{latlong_list}", header=0)
+    df = pd.read_csv(f"gs://{bucket_name}/{latlong_list}", header=0, dtype={'LAT': np.float64, 'LONG': np.float64})
 
-    latlong_list = [(np.round(float(row.LAT), latlong_resolution),
-                     np.round(float(row.LONG), latlong_resolution),
+    latlong_list = [(np.round(float(row.LAT), int(latlong_resolution)),
+                     np.round(float(row.LONG), int(latlong_resolution)),
                      radius) 
                     for index, row in df.iterrows()]
 
