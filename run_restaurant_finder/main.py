@@ -14,10 +14,10 @@ if __name__ == '__main__':
     restaurant_bucket_name = get_bucket_name(project_id=project_id, version_id="latest")
     
     parser = argparse.ArgumentParser()
-    parser.add_argument("--n_steps", required=False, default=3)
-    parser.add_argument("--radius", required=False, default=666)
+    #parser.add_argument("--n_steps", required=False, default=3)
     #parser.add_argument("--maps_zone_name", required=True)
-    #parser.add_argument("--list_of_latlong", required=True, default="")
+    parser.add_argument("--radius", required=False, default=666)
+    parser.add_argument("--list_of_latlong", required=True, default="")
     parser.add_argument("--latlong_resolution", required=False, default=0)
 
     
@@ -31,16 +31,17 @@ if __name__ == '__main__':
     #                                    int(args.radius))
 
     latlong_list = get_latlong_from_bucket(project_id=project_id,
-                                           bucket_name=restaurant_bucket_name, 
-                                           latlong_resolution=args.latlong_resoltuion,
+                                           bucket_name=restaurant_bucket_name,
+                                           list_of_latlong=args.list_of_latlong, 
+                                           latlong_resolution=args.latlong_resolution,
                                            radius=args.radius)
 
 
 
-    print('this is the lat long grid', lat_long_grid)
+    print('this is the lat long grid', latlong_list)
 
     # pass over the grid
-    restaurants, saturated_list = iterate_over_calls(lat_long_grid, restaurants={}, project_id=project_id)
+    restaurants, saturated_list = iterate_over_calls(latlong_list, restaurants={}, project_id=project_id)
     print('after first grid we found ', str(len(restaurants)), ' restaurants')
 
     # take the saturated list and generate 

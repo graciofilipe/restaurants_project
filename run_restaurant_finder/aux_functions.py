@@ -21,19 +21,26 @@ def build_lat_long_grid(top_left, bottom_right, n_steps, radius):
 
 
 
-
-def get_latlong_from_bucket(project_id=project_id, bucket_name=restaurant_bucket_name,
-                            latlong_resolution=latlong_resoltuion, radius=radius):
+def get_latlong_from_bucket(project_id,
+                            bucket_name,
+                            list_of_latlong, 
+                            latlong_resolution,
+                            radius):
     # get csv file from bucket in pandas format
     storage_client = storage.Client()
     bucket = storage_client.bucket(bucket_name)
-    blob = bucket.blob(f'latlong.csv')
+    blob = bucket.blob(f'{list_of_latlong}')
     csv_file = pd.read_csv(blob.download_as_string().decode('utf-8'))
 
     latlong_list = [(np.round(row.LAT, latlong_resolution),
                      np.round(row.LONG, latlong_resolution),
                      radius) 
                     for index, row in csv_file.iterrows()]
+
+    # deduplucate the latlong_list
+    latlong_list = list(set(latlong_list))
+
+
 
     return latlong_list
 
