@@ -5,22 +5,6 @@ import pandas as pd
 
 
 
-def build_lat_long_grid(top_left, bottom_right, n_steps, radius):
-
-    lat_step = (top_left[0] - bottom_right[0]) / n_steps
-    long_step = (bottom_right[1] - top_left[1]) / n_steps
-    lat_long_pairs = []
-    for i in range(n_steps):
-        for j in range(n_steps):
-            lat = top_left[0] - i * lat_step
-            long = top_left[1] + j * long_step
-            lat_long_pairs.append((lat, long, radius))
-        
-    assert len(lat_long_pairs) == len(set(lat_long_pairs)), "Generated grid contains duplicate points"
-
-    return lat_long_pairs
-
-
 
 def get_latlong_from_bucket(project_id,
                             bucket_name,
