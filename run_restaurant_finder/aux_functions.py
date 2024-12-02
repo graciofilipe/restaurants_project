@@ -24,23 +24,24 @@ def build_lat_long_grid(top_left, bottom_right, n_steps, radius):
 
 def get_latlong_from_bucket(project_id,
                             bucket_name,
-                            list_of_latlong, 
+                            latlong_list, 
                             latlong_resolution,
                             radius):
 
     import pandas as pd
     import numpy as np
+    print('bucket name', bucket_name)
+    print('latlong list', latlong_list)
+    print('latlong resolution', latlong_resolution)
 
-    # get csv file from bucket in pandas format
-    storage_client = storage.Client()
-    bucket = storage_client.bucket(bucket_name)
-    blob = bucket.blob(f'{list_of_latlong}')
-    csv_file = pd.read_csv(blob.download_as_string().decode('utf-8'))
+
+    # use pandas to download csv from gcs bucket
+    df = pd.read_csv(f"gs://{bucket_name}/{latlong_list}")
 
     latlong_list = [(np.round(row.LAT, latlong_resolution),
                      np.round(row.LONG, latlong_resolution),
                      radius) 
-                    for index, row in csv_file.iterrows()]
+                    for index, row in df.iterrows()]
 
     # deduplucate the latlong_list
     latlong_list = list(set(latlong_list))
