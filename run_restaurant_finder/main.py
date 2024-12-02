@@ -32,7 +32,7 @@ if __name__ == '__main__':
 
     latlong_list = get_latlong_from_bucket(project_id=project_id,
                                            bucket_name=restaurant_bucket_name,
-                                           list_of_latlong=args.latlong_list, 
+                                           latlong_list=args.latlong_list, 
                                            latlong_resolution=args.latlong_resolution,
                                            radius=args.radius)
 
