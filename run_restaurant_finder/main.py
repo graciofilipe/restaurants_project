@@ -17,7 +17,7 @@ if __name__ == '__main__':
     #parser.add_argument("--n_steps", required=False, default=3)
     #parser.add_argument("--maps_zone_name", required=True)
     parser.add_argument("--radius", required=False, default=666)
-    parser.add_argument("--latlong_list", required=True, default="")
+    parser.add_argument("--latlong_list", required=False, default="postcodes/latlong.csv")
     parser.add_argument("--latlong_resolution", required=False, default=0)
 
     
