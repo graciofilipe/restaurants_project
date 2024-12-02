@@ -45,7 +45,7 @@ if __name__ == '__main__':
     print('after first grid we found ', str(len(restaurants)), ' restaurants')
 
     # take the saturated list and generate 
-    points_list = []
+    points_list: list[tuple[float, float, int]] = []
     for lat, long, radius in saturated_list:
         points = generate_spoke_points(lat, long, 100) # 100 meters away from point of saturation
         points_with_radius = [(new_lat, new_long, radius/2) for new_lat, new_long in points]
