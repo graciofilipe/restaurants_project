@@ -27,6 +27,10 @@ def get_latlong_from_bucket(project_id,
                             list_of_latlong, 
                             latlong_resolution,
                             radius):
+
+    import pandas as pd
+    import numpy as np
+
     # get csv file from bucket in pandas format
     storage_client = storage.Client()
     bucket = storage_client.bucket(bucket_name)

@@ -17,7 +17,7 @@ if __name__ == '__main__':
     #parser.add_argument("--n_steps", required=False, default=3)
     #parser.add_argument("--maps_zone_name", required=True)
     parser.add_argument("--radius", required=False, default=666)
-    parser.add_argument("--list_of_latlong", required=True, default="")
+    parser.add_argument("--latlong_list", required=True, default="")
     parser.add_argument("--latlong_resolution", required=False, default=0)
 
     
@@ -32,7 +32,7 @@ if __name__ == '__main__':
 
     latlong_list = get_latlong_from_bucket(project_id=project_id,
                                            bucket_name=restaurant_bucket_name,
-                                           list_of_latlong=args.list_of_latlong, 
+                                           list_of_latlong=args.latlong_list, 
                                            latlong_resolution=args.latlong_resolution,
                                            radius=args.radius)
 
