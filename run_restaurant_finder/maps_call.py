@@ -24,8 +24,8 @@ def send_request(lat, long, radius, rank, API_KEY):
         "fine_dining_restaurant", "food_court", "ice_cream_shop", "juice_shop", "meal_delivery", "meal_takeaway", "pub",
         "sandwich_shop", "tea_house", "vegan_restaurant", "wine_bar"],
     "excludedTypes": ["acai_shop", "bagel_shop", "bakery", "bar", "candy_store", "cat_cafe", "chocolate_factory", 
-        "chocolate_shop", "coffee_shop", "deli", "dessert_restaurant", "dessert_shop", "dog_cafe", "donut_shop",
-        "fast_food_restaurant", "food_court", "ice_cream_shop", "juice_shop", "meal_delivery", "meal_takeaway", "pub",
+        "chocolate_shop", "coffee_shop", "dessert_restaurant", "dessert_shop", "dog_cafe", "donut_shop",
+        "fast_food_restaurant", "food_court", "ice_cream_shop", "juice_shop", "pub",
         "sandwich_shop", "tea_house","wine_bar"],
     "locationRestriction": {
         "circle": {
