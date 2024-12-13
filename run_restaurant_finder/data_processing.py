@@ -24,9 +24,9 @@ def iterate_over_calls(lat_long_pairs, restaurants, project_id, ammount_of_noise
 
         for lat, long, radius in lat_long_pairs:
             lat_noise = np.random.normal(0, ammount_of_noise)
-            lat_noise = lat + lat_noise
+            lat = lat + lat_noise
             long_noise = np.random.normal(0, ammount_of_noise)
-            long_noise = long + long_noise
+            long = long + long_noise
 
 
             response_json = send_request(lat, long, radius, rank, API_KEY)
