@@ -15,3 +15,22 @@ This script takes the following arguments:
 
 *   **`--latlong_resolution`**: This argument controls the precision of the latitude and longitude coordinates by rounding them to the specified number of decimal places. For example, a value of 3 would round coordinates to three decimal places (e.g., 34.123, -118.456).  This helps to reduce the number of unique locations and consolidate nearby searches. The default value is 3.
 
+
+
+# prompt: Select the name, rating, user_rating_count, and types for the restaurants that have first_seen less than 60 days from today and have user_rating_count between 5 and 60. Order by average rating descending
+
+SELECT
+  displayName,
+  rating as average_rating,
+  user_rating_count as number_of_reviews, 
+  shortFormattedAddress, 
+  primary_type,
+  types as extra_types
+FROM
+  `project-name.restaurants_dataset.restaurants_table`
+WHERE
+  DATE_DIFF(CURRENT_DATE(), first_seen, DAY) < 30
+  AND user_rating_count BETWEEN 5 AND 66
+  AND rating > 4
+ORDER BY
+  rating DESC;
