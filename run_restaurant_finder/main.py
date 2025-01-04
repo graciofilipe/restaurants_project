@@ -56,7 +56,7 @@ if __name__ == '__main__':
         points_with_radius = [(new_lat, new_long, radius/2) for new_lat, new_long in points]
         points_list = points_list + points_with_radius
      
-    restaurants, _ = iterate_over_calls(points_list, restaurants=restaurants, project_id=project_id)
+    restaurants, _ = iterate_over_calls(points_list, restaurants=restaurants, project_id=project_id, amount_of_noise=float(args.amount_of_noise))
 
     print('after expended list we found a TOTAL', str(len(restaurants)), ' restaurants')
 
