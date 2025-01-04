@@ -16,8 +16,11 @@ if __name__ == '__main__':
     parser.add_argument("--radius", required=False, default=666)
     parser.add_argument("--latlong_list", required=False, default="postcodes/latlong.csv")
     parser.add_argument("--limit", required=False, default=20)
-    parser.add_argument("--latlong_resolution", required=False, default=1)
+    parser.add_argument("--amount_of_noise", required=False, default=0.002)
+    parser.add_argument("--latlong_resolution", required=False, default=3)
     args = parser.parse_args()
+
+    print('these are the arguments passed: \n', args)
 
     latlong_list = get_latlong_from_bucket(project_id=project_id,
                                            bucket_name=restaurant_bucket_name,
@@ -42,7 +45,7 @@ if __name__ == '__main__':
     print('the latlong_list has ', str(len(latlong_list)), ' elements')
 
     # pass over the grid
-    restaurants, saturated_list = iterate_over_calls(latlong_list, restaurants={}, project_id=project_id)
+    restaurants, saturated_list = iterate_over_calls(latlong_list, restaurants={}, project_id=project_id, ammount_of_noise=float(args.ammount_of_noise))
     print('after first grid we found ', str(len(restaurants)), ' restaurants')
     print('the saturated_list has ', str(len(saturated_list)), ' elements')
 

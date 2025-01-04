@@ -8,8 +8,7 @@ from google.cloud import bigquery
 
 
 
-
-def iterate_over_calls(lat_long_pairs, restaurants, project_id, ammount_of_noise=0.001):
+def iterate_over_calls(lat_long_pairs, restaurants, project_id, ammount_of_noise):
     import numpy as np
 
     API_KEY= access_secret_version(project_id=project_id, secret_id='maps-key')
