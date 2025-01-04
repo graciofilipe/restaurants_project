@@ -45,7 +45,7 @@ if __name__ == '__main__':
     print('the latlong_list has ', str(len(latlong_list)), ' elements')
 
     # pass over the grid
-    restaurants, saturated_list = iterate_over_calls(latlong_list, restaurants={}, project_id=project_id, ammount_of_noise=float(args.ammount_of_noise))
+    restaurants, saturated_list = iterate_over_calls(latlong_list, restaurants={}, project_id=project_id, amount_of_noise=float(args.amount_of_noise))
     print('after first grid we found ', str(len(restaurants)), ' restaurants')
     print('the saturated_list has ', str(len(saturated_list)), ' elements')
 

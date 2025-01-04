@@ -8,7 +8,7 @@ from google.cloud import bigquery
 
 
 
-def iterate_over_calls(lat_long_pairs, restaurants, project_id, ammount_of_noise):
+def iterate_over_calls(lat_long_pairs, restaurants, project_id, amount_of_noise):
     import numpy as np
 
     API_KEY= access_secret_version(project_id=project_id, secret_id='maps-key')
@@ -22,9 +22,9 @@ def iterate_over_calls(lat_long_pairs, restaurants, project_id, ammount_of_noise
         print(f'starting the {rank} based analysis')
 
         for lat, long, radius in lat_long_pairs:
-            lat_noise = np.random.normal(0, ammount_of_noise)
+            lat_noise = np.random.normal(0, amount_of_noise)
             lat = lat + lat_noise
-            long_noise = np.random.normal(0, ammount_of_noise)
+            long_noise = np.random.normal(0, amount_of_noise)
             long = long + long_noise
 
 
