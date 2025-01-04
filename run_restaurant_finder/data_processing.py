@@ -100,7 +100,6 @@ def upload_restaurants_to_bigquery(concatenated_dict, project_id):
 
     rows_to_insert = []
     for restaurant_id, restaurant_data in concatenated_dict.items():
-        print('going to insert rows in newly created table')
         row = {
             'restaurant_id': restaurant_id,
             'displayName': restaurant_data.get('displayName', 'NA'),
