@@ -17,7 +17,7 @@ if __name__ == '__main__':
     parser.add_argument("--latlong_list", required=False, default="postcodes/latlong.csv")
     parser.add_argument("--limit", required=False, default=20)
     parser.add_argument("--amount_of_noise", required=False, default=0.002)
-    parser.add_argument("--latlong_resolution", required=False, default=3)
+    parser.add_argument("--latlong_resolution", required=False, default=2)
     args = parser.parse_args()
 
     print('these are the arguments passed: \n', args)
