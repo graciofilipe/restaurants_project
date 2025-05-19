@@ -113,20 +113,37 @@ def main():
                 if 'first_seen' in results_df.columns:
                     st.write(f"Filtering for 'first_seen' date: {today_str}")
                     try:
-                        # Ensure 'first_seen' is string 'YYYY-MM-DD'
-                        # If it's already a string, this won't change it.
-                        # If it's a datetime object, it will convert it.
-                        if not pd.api.types.is_string_dtype(results_df['first_seen']):
-                             results_df['first_seen'] = pd.to_datetime(results_df['first_seen']).dt.strftime('%Y-%m-%d')
+                        # Convert to datetime, coercing errors to NaT
+                        dt_series = pd.to_datetime(results_df['first_seen'], errors='coerce')
+                        # Format to string 'YYYY-MM-DD'; NaT will become 'NaT' (a string) or stay pd.NaT depending on pandas version
+                        results_df['first_seen'] = dt_series.dt.strftime('%Y-%m-%d')
+                        
+                        # Ensure everything is a string. Replace 'NaT' strings or any non-string (like actual pd.NaT if strftime didn't convert it) with empty string.
+                        # A robust way to check for pd.NaT if it wasn't converted to string 'NaT' by strftime:
+                        # results_df['first_seen'] = results_df['first_seen'].apply(lambda x: '' if pd.isna(x) else x)
+                        # Then, ensure all are strings, especially if 'NaT' strings are present.
+                        results_df['first_seen'] = results_df['first_seen'].astype(str)
+                        # Replace string 'NaT' (if NaT was converted to this string by strftime or astype) with empty string
+                        results_df['first_seen'] = results_df['first_seen'].replace('NaT', '')
+
                     except Exception as e:
-                        st.warning(f"Could not convert 'first_seen' column to string format 'YYYY-MM-DD': {e}. Proceeding without date filtering for this column if types are incompatible.")
+                        st.warning(f"Error during 'first_seen' column processing: {e}. Attempting to proceed, but date filtering may be affected.")
+                        # As a fallback, ensure the column is string type to prevent subsequent errors, filling errors with empty string
+                        results_df['first_seen'] = results_df['first_seen'].astype(str).fillna('')
+
+                    # Now, the column should be all strings (either 'YYYY-MM-DD' or '')
+                    # The original check 'is_string_dtype' might be too strict if mixed (e.g. actual NaT objects),
+                    # but after the above conversions, it should be safer.
+                    # However, direct comparison should work fine now.
                     
-                    # Check type after potential conversion before filtering
-                    if pd.api.types.is_string_dtype(results_df['first_seen']):
-                        filtered_df = results_df[results_df['first_seen'] == today_str]
+                    # Proceed with filtering
+                    filtered_df = results_df[results_df['first_seen'] == today_str]
+                    if not filtered_df.empty or results_df['first_seen'].eq(today_str).any():
                         results_df = filtered_df
-                    else:
-                        st.warning("Skipping date filtering as 'first_seen' is not in a comparable string format.")
+                    elif not results_df['first_seen'].eq('').all(): # Only warn if there were actual dates that didn't match
+                        st.info(f"No entries found for 'first_seen' date: {today_str}. Displaying all entries.")
+                    # No explicit warning if all were empty strings (i.e. invalid dates)
+
                 else:
                     st.warning("Warning: 'first_seen' column not found in results. Cannot apply date filter.")
 

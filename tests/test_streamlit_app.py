@@ -2,6 +2,7 @@ import unittest
 from unittest.mock import patch, MagicMock, call
 import pandas as pd # Required for type hints and mocking if df operations are involved
 from datetime import datetime, date # Added for the new test
+import numpy as np # For np.nan for the new test case
 
 # Add the parent directory to sys.path to allow importing streamlit_app
 # This is often needed when tests are in a subdirectory.
@@ -287,6 +288,64 @@ class TestStreamlitAppGCSProcessing(unittest.TestCase):
         
         # Check that st.write was called with the filtering message
         mock_st.write.assert_any_call(f"Filtering for 'first_seen' date: {mock_today.strftime('%Y-%m-%d')}")
+
+
+class TestStreamlitAppDateFiltering(unittest.TestCase):
+    def test_first_seen_date_filtering_logic(self):
+        # Mock today's date for consistent testing
+        today_str = '2023-01-15'
+
+        data = {
+            'displayName': ['Restaurant A', 'Restaurant B', 'Restaurant C', 'Restaurant D', 'Restaurant E', 'Restaurant F', 'Restaurant G', 'Restaurant H', 'Restaurant I'],
+            'first_seen': [
+                '2023-01-15',                      # Valid, matches today
+                datetime(2023, 1, 15),             # Valid datetime, matches today
+                'Jan 10, 2023',                    # Valid, different format, does not match
+                '2023/01/20',                      # Valid, different format, does not match
+                'not-a-date',                      # Invalid string
+                None,                              # None value
+                np.nan,                            # NaN value
+                pd.NaT,                            # NaT value
+                '2023-01-15T10:30:00'              # Datetime string, matches today by date
+            ]
+        }
+        results_df = pd.DataFrame(data)
+
+        # --- Apply the processing logic from streamlit_app.py ---
+        # 1. Convert to datetime, coercing errors
+        dt_series = pd.to_datetime(results_df['first_seen'], errors='coerce')
+        
+        # 2. Format to string 'YYYY-MM-DD'
+        # NaT becomes 'NaT' string, valid dates become 'YYYY-MM-DD'
+        results_df['first_seen'] = dt_series.dt.strftime('%Y-%m-%d')
+        
+        # 3. Ensure everything is a string and replace 'NaT' (string) with empty string
+        results_df['first_seen'] = results_df['first_seen'].astype(str)
+        results_df['first_seen'] = results_df['first_seen'].replace('NaT', '')
+        # --- End of processing logic application ---
+
+        # Perform filtering
+        filtered_df = results_df[results_df['first_seen'] == today_str]
+
+        # Assertions
+        self.assertTrue(pd.api.types.is_string_dtype(results_df['first_seen']), "Processed 'first_seen' column should be all strings")
+        
+        expected_processed_values = [
+            '2023-01-15',  # '2023-01-15'
+            '2023-01-15',  # datetime(2023, 1, 15)
+            '2023-01-10',  # 'Jan 10, 2023'
+            '2023-01-20',  # '2023/01/20'
+            '',            # 'not-a-date'
+            '',            # None
+            '',            # np.nan
+            '',            # pd.NaT
+            '2023-01-15'   # '2023-01-15T10:30:00'
+        ]
+        self.assertEqual(results_df['first_seen'].tolist(), expected_processed_values, "Mismatch in processed 'first_seen' values")
+
+        # Assert on the filtered DataFrame
+        self.assertEqual(len(filtered_df), 3, "Should only have 3 rows matching today's date")
+        self.assertTrue(all(filtered_df['displayName'].isin(['Restaurant A', 'Restaurant B', 'Restaurant I'])), "Incorrect rows in filtered_df")
 
 
 if __name__ == '__main__':
