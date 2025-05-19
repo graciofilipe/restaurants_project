@@ -34,6 +34,26 @@ WHERE
 ORDER BY
   rating DESC;
 
+## BigQuery Table Viewer
+
+The application now includes a "BigQuery Table Viewer" accessible via the sidebar navigation.
+
+### How to Use
+
+1.  **Navigate to the Viewer:** Select "BigQuery Table Viewer" from the sidebar.
+2.  **Enter Table URI:** In the input field, provide the BigQuery table URI in the format `project_id.dataset_id.table_id`.
+    *   Example: `my-gcp-project.my_dataset.my_table`
+3.  **Load Table:** Click the "Load Table" button.
+4.  **View Data:** If the URI is correct and you have permissions, the table data will be displayed.
+
+### Important Notes
+
+*   **Authentication:** Ensure you are authenticated with Google Cloud and have the necessary permissions to read the specified BigQuery table. Typically, running `gcloud auth application-default login` locally is sufficient if your user account has "BigQuery Data Viewer" role (or equivalent) on the project/dataset/table.
+*   **Error Handling:** The viewer includes basic error handling for:
+    *   Invalid URI format.
+    *   Table not found.
+    *   Permission denied.
+
 ## Streamlit Frontend for Restaurant Finder
 
 This Streamlit application provides a user interface for the Restaurant Finder. You can upload a CSV file containing geolocations (latitude, longitude, and an optional radius in km per point) to find restaurants in those areas.
