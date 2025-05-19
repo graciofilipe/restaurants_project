@@ -1,32 +1,31 @@
 # Use an official Python runtime as a parent image
-FROM python:3.10-slim
+FROM python:3.12-slim
 
 # Set the working directory in the container
 WORKDIR /app
 
-# Copy the frontend app and its requirements
-COPY ./frontend_streamlit/requirements.txt /app/frontend_requirements.txt
-COPY ./frontend_streamlit/app.py /app/app.py
+# --- Copy Simulation Code ---
+# into the container under the working directory.
+COPY restaurant_finder/ ./restaurant_finder/
+COPY streamlit_app.py .
 
-# Copy the backend module and its requirements
-# The backend code is in the 'run_restaurant_finder' directory at the root
-# The Docker build context will be the root of the repository.
-# So, when this Dockerfile (located in frontend_streamlit) is built,
-# the paths for COPY should be relative to the build context (repository root).
-COPY ./run_restaurant_finder /app/run_restaurant_finder
-COPY ./run_restaurant_finder/requirements.txt /app/backend_requirements.txt
+# --- Install Dependencies ---
+# Copy the full requirements file for the simulation
+COPY requirements.txt .
 
-# Install frontend dependencies
-RUN pip install --no-cache-dir -r frontend_requirements.txt
+# Install Python dependencies for Flask AND the simulation
+# Using --no-cache-dir reduces image size
+RUN pip install --no-cache-dir --upgrade pip
+# Flask is no longer needed
+RUN pip install --no-cache-dir -r requirements.txt 
 
-# Install backend dependencies
-RUN pip install --no-cache-dir -r backend_requirements.txt
+RUN apt update
+#RUN apt install -y graphviz
 
-# Make port 8501 available to the world outside this container
-EXPOSE 8501
 
-# Define environment variable
-ENV PYTHONUNBUFFERED 1
+# Optional: Set PYTHONPATH if your simulation code uses relative imports across modules
+ENV PYTHONPATH=/app
 
-# Run app.py when the container launches
-CMD ["streamlit", "run", "app.py"]
+# Run streamlit_app.py when the container launches
+# Use shell form to allow $PORT substitution
+ENTRYPOINT streamlit run streamlit_app.py --server.port=$PORT --server.address=0.0.0.0
