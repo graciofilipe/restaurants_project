@@ -5,8 +5,9 @@ import sys
 
 try:
     from restaurant_finder.main import find_restaurants_in_batches
+    from restaurant_finder.aux_functions import get_latlong_from_bucket
 except ImportError as e:
-    st.error(f"Error importing find_restaurants_in_batches: {e}. Ensure restaurant_finder module is accessible.")
+    st.error(f"Error importing find_restaurants_in_batches or get_latlong_from_bucket: {e}. Ensure restaurant_finder module and its dependencies are accessible.")
     # You might want to stop the app here or provide more specific instructions
     # For now, we'll let it potentially fail later if the import didn't work.
 
@@ -19,8 +20,8 @@ def main():
     project_id_input = st.text_input("Google Cloud Project ID", 
                                      help="Your GCP Project ID is required for backend operations (GCS, BigQuery, Maps API).")
 
-    uploaded_file = st.file_uploader("Upload a CSV file with columns: 'latitude', 'longitude', and optionally 'radius' (in km)",
-                                     type="csv")
+    gcs_path_input = st.text_input("GCS Path for Coordinates CSV",
+                                   help="Enter the GCS path to your CSV file, like `gs://your-bucket-name/path/to/your-file.csv`")
 
     default_radius_for_input_km = st.number_input("Default Search Radius (km)",
                                                   min_value=0.1, value=1.0, step=0.1,
@@ -44,8 +45,8 @@ def main():
             st.error("Please enter the Google Cloud Project ID.")
             st.stop()
 
-        if uploaded_file is None:
-            st.error("Please upload a CSV file with coordinates.")
+        if not gcs_path_input:
+            st.error("Please enter the GCS path for the coordinates CSV file.")
             st.stop()
 
         # Set Project ID environment variable
@@ -55,29 +56,35 @@ def main():
 
 
         try:
-            df = pd.read_csv(uploaded_file)
+            default_radius_meters = int(default_radius_for_input_km * 1000)
+            latlong_list_input = [] # Initialize to ensure it's defined
 
-            if 'latitude' not in df.columns or 'longitude' not in df.columns:
-                st.error("CSV must contain 'latitude' and 'longitude' columns.")
+            if not gcs_path_input.startswith("gs://"):
+                st.error("Invalid GCS path format. Must start with 'gs://'.")
                 st.stop()
 
-            latlong_list_input = []
-            default_radius_meters = int(default_radius_for_input_km * 1000) # Use renamed variable
-
-            for _, row in df.iterrows():
-                lat = row['latitude']
-                lon = row['longitude']
-                # Radius: use from CSV if present (and assume it's in km), else use default
-                # The backend expects radius in meters for each point in the list.
-                if 'radius' in df.columns and pd.notna(row['radius']):
-                    radius_for_point_meters = int(float(row['radius']) * 1000) 
-                else:
-                    radius_for_point_meters = default_radius_meters
-                # Backend expects radius_for_point_meters in meters
-                latlong_list_input.append((lat, lon, radius_for_point_meters))
+            parts = gcs_path_input[5:].split("/", 1)
+            if len(parts) < 2 or not parts[0] or not parts[1]: # Check for bucket and file path
+                st.error("Invalid GCS path format. Must include bucket name and file path (e.g., gs://bucket/file.csv).")
+                st.stop()
             
+            bucket_name = parts[0]
+            file_path_in_bucket = parts[1]
+
+            st.info(f"Attempting to read from GCS bucket: '{bucket_name}', file: '{file_path_in_bucket}'")
+
+            # Call get_latlong_from_bucket
+            # Parameters: project_id, bucket_name, latlong_list (file path in bucket), latlong_resolution, radius
+            latlong_list_input = get_latlong_from_bucket(
+                project_id=project_id_input,
+                bucket_name=bucket_name,
+                latlong_list=file_path_in_bucket, # This is file_path_in_bucket
+                latlong_resolution=2, # Default value as specified
+                radius=default_radius_meters # Default radius in meters
+            )
+
             if not latlong_list_input:
-                st.error("No valid coordinates found in the CSV or CSV is empty.")
+                st.error("No valid coordinates found in the GCS file, or the file is empty.")
                 st.stop()
 
             st.info(f"Prepared {len(latlong_list_input)} coordinates for processing.")
@@ -85,23 +92,19 @@ def main():
             # Call Backend Function
             st.info("Finding restaurants... This may take a few minutes.")
             with st.spinner('Processing...'):
-                # The 'radius_input' to find_restaurants_in_batches is the general default radius (like args.radius),
-                # but the individual radii in latlong_list_input will be used by iterate_over_calls.
-                # We pass default_radius_meters for this parameter.
                 restaurants_dict = find_restaurants_in_batches(
                     latlong_list_input=latlong_list_input,
                     project_id_input=project_id_input,
-                    radius_input=default_radius_meters, # General default radius in meters
+                    radius_input=default_radius_meters, 
                     limit_input=int(limit_coords),
                     amount_of_noise_input=float(amount_of_noise),
-                    spoke_generation_radius_meters=int(spoke_radius_input) # Pass the new spoke radius
+                    spoke_generation_radius_meters=int(spoke_radius_input)
                 )
 
             # Display Results
             if restaurants_dict:
                 st.success(f"Found {len(restaurants_dict)} unique restaurants!")
                 results_df = pd.DataFrame.from_dict(restaurants_dict, orient='index')
-                
                 # Define columns to display, checking if they exist
                 display_cols = []
                 potential_cols = ['displayName', 'shortFormattedAddress', 'rating', 'priceLevel', 'primary_type', 'user_rating_count', 'location']
@@ -111,6 +114,8 @@ def main():
                 
                 if 'displayName' in results_df.columns: # Check if primary key column exists
                      st.dataframe(results_df[display_cols])
+                else:
+                    st.info("No 'displayName' column in results, cannot display table.")
 
 
                 # Optional Map Display:
@@ -142,19 +147,19 @@ def main():
             else:
                 st.info("No restaurants found for the given locations.")
 
-        except ImportError: # Catches the import error if it wasn't caught at the top
-            st.error("Critical Error: The backend function 'find_restaurants_in_batches' could not be imported. Please check the server logs.")
-        except FileNotFoundError as e:
-            st.error(f"File not found: {e}. This might be related to the CSV path or backend file access.")
-        except pd.errors.EmptyDataError:
-            st.error("The uploaded CSV file is empty.")
-        except pd.errors.ParserError:
-            st.error("Could not parse the CSV file. Please ensure it's a valid CSV.")
-        except ValueError as ve:
-            st.error(f"Input error: {ve}")
-        except Exception as e:
-            st.error(f"An unexpected error occurred: {e}")
-            st.error("Details: " + str(e)) # provide more details for debugging
+        except ImportError: 
+            st.error("Critical Error: A required backend function ('find_restaurants_in_batches' or 'get_latlong_from_bucket') could not be imported. Please check server logs and ensure the 'restaurant_finder' module is correctly installed and accessible.")
+        except ValueError as ve: # Catch specific ValueErrors from path parsing or function calls
+            st.error(f"Configuration or Input Error: {ve}")
+        except FileNotFoundError as fnfe: # If get_latlong_from_bucket raises this for GCS
+            st.error(f"GCS File Error: {fnfe}. Ensure the file exists at the specified path and the application has permissions.")
+        except pd.errors.EmptyDataError: 
+            st.error("The CSV file from GCS is empty or contains no data.")
+        except pd.errors.ParserError: 
+            st.error("Could not parse the CSV file from GCS. Please ensure it's a valid CSV with expected columns ('LAT', 'LONG', optionally 'RADIUS_KM').")
+        except Exception as e: # General catch-all for other unexpected errors
+            st.error(f"An unexpected error occurred during GCS processing or restaurant finding: {e}")
+            st.error("Details: " + str(e))
 
 if __name__ == "__main__":
     # Check if find_restaurants_in_batches was imported successfully before running
