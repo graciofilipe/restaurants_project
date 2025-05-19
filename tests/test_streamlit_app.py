@@ -1,6 +1,7 @@
 import unittest
 from unittest.mock import patch, MagicMock, call
 import pandas as pd # Required for type hints and mocking if df operations are involved
+from datetime import datetime, date # Added for the new test
 
 # Add the parent directory to sys.path to allow importing streamlit_app
 # This is often needed when tests are in a subdirectory.
@@ -201,6 +202,91 @@ class TestStreamlitAppGCSProcessing(unittest.TestCase):
         mock_st.stop.assert_called_once()
         mock_get_latlong.assert_not_called()
         mock_find_restaurants.assert_not_called()
+
+    @patch('streamlit_app.st')
+    @patch('streamlit_app.get_latlong_from_bucket') # Mocked as it's part of the flow before filtering
+    @patch('streamlit_app.find_restaurants_in_batches')
+    @patch('streamlit_app.datetime')
+    def test_filter_restaurants_by_first_seen_date_correct(self, mock_dt, mock_find_restaurants, mock_get_latlong, mock_st):
+        # --- Setup Mocks ---
+        mock_today = date(2025, 5, 19)
+        
+        # Configure datetime mock
+        mock_dt.today.return_value = mock_today
+        # strftime is called on the date object returned by today()
+        # So, we make sure today() returns an object that has a strftime method
+        # No need to mock strftime separately if today() returns a real date object, 
+        # or a mock that behaves like one.
+        # If datetime.today() is called directly and then strftime, then:
+        # mock_dt.today.return_value.strftime.return_value = mock_today.strftime('%Y-%m-%d')
+
+        sample_restaurants_data = {
+            "id1": {"displayName": "Restaurant A", "first_seen": "2025-05-19", "location": {"lat":1, "lng":1}},
+            "id2": {"displayName": "Restaurant B", "first_seen": "2025-05-18", "location": {"lat":1, "lng":1}},
+            "id3": {"displayName": "Restaurant C", "first_seen": "2025-05-19", "location": {"lat":1, "lng":1}},
+            "id4": {"displayName": "Restaurant D", "location": {"lat":1, "lng":1}}, # No first_seen
+            "id5": {"displayName": "Restaurant E", "first_seen": "2024-01-01", "location": {"lat":1, "lng":1}},
+            # Test with actual date object, app should convert it
+            "id6": {"displayName": "Restaurant F", "first_seen": date(2025, 5, 19), "location": {"lat":1, "lng":1}}, 
+        }
+        mock_find_restaurants.return_value = sample_restaurants_data
+
+        # Simulate UI inputs necessary to reach the relevant part of the code
+        mock_st.text_input.side_effect = [
+            "test-project-id",  # project_id_input
+            "gs://test-bucket/data/coords.csv"  # gcs_path_input
+        ]
+        mock_st.number_input.side_effect = [
+            1.0,  # default_radius_for_input_km
+            10,   # limit_coords
+            0.002,# amount_of_noise
+            100   # spoke_radius_input
+        ]
+        mock_st.button.return_value = True # Simulate button click
+
+        # Mock get_latlong_from_bucket to return some dummy data
+        mock_get_latlong.return_value = [(10.0, 20.0, 500)] # Dummy coordinate list
+
+        # Mock spinner to act as a context manager
+        mock_spinner_instance = MagicMock()
+        mock_st.spinner.return_value = mock_spinner_instance
+        mock_spinner_instance.__enter__.return_value = None
+        mock_spinner_instance.__exit__.return_value = None
+
+        # --- Execute ---
+        streamlit_app.main()
+
+        # --- Assertions ---
+        # Check that st.dataframe was called
+        mock_st.dataframe.assert_called() # Check if it was called at least once
+
+        # Capture the DataFrame passed to st.dataframe
+        # The actual call might be mock_st.dataframe(results_df[display_cols])
+        # We need to get the first argument of the last call to st.dataframe
+        call_args = mock_st.dataframe.call_args
+        self.assertIsNotNone(call_args, "st.dataframe was not called")
+        
+        displayed_df = call_args[0][0] # Get the first positional argument of the call
+
+        # Perform assertions on the displayed_df
+        self.assertEqual(len(displayed_df), 3, f"Expected 3 rows, got {len(displayed_df)}")
+        self.assertIn("id1", displayed_df.index)
+        self.assertIn("id3", displayed_df.index)
+        self.assertIn("id6", displayed_df.index) # This should be included as its date matches mock_today
+        
+        self.assertNotIn("id2", displayed_df.index)
+        self.assertNotIn("id4", displayed_df.index) # No 'first_seen'
+        self.assertNotIn("id5", displayed_df.index)
+
+        # Verify that the warning for 'first_seen' not found was NOT called for id4 (it is handled)
+        # but that the general processing continued.
+        # We expect a warning for 'first_seen' column not found if the *column itself* is missing,
+        # not for individual rows. The current code applies a warning if the column is missing entirely.
+        # If 'id4' caused a specific warning that we want to check, the app logic would need to do that.
+        # The current test setup implies the column 'first_seen' WILL exist due to other entries.
+        
+        # Check that st.write was called with the filtering message
+        mock_st.write.assert_any_call(f"Filtering for 'first_seen' date: {mock_today.strftime('%Y-%m-%d')}")
 
 
 if __name__ == '__main__':

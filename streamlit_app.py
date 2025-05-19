@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import os
 import sys
+from datetime import datetime
 
 try:
     from restaurant_finder.main import find_restaurants_in_batches
@@ -101,10 +102,34 @@ def main():
                     spoke_generation_radius_meters=int(spoke_radius_input)
                 )
 
+            today_str = datetime.today().strftime('%Y-%m-%d')
+
             # Display Results
             if restaurants_dict:
                 st.success(f"Found {len(restaurants_dict)} unique restaurants!")
                 results_df = pd.DataFrame.from_dict(restaurants_dict, orient='index')
+
+                # Date filtering logic
+                if 'first_seen' in results_df.columns:
+                    st.write(f"Filtering for 'first_seen' date: {today_str}")
+                    try:
+                        # Ensure 'first_seen' is string 'YYYY-MM-DD'
+                        # If it's already a string, this won't change it.
+                        # If it's a datetime object, it will convert it.
+                        if not pd.api.types.is_string_dtype(results_df['first_seen']):
+                             results_df['first_seen'] = pd.to_datetime(results_df['first_seen']).dt.strftime('%Y-%m-%d')
+                    except Exception as e:
+                        st.warning(f"Could not convert 'first_seen' column to string format 'YYYY-MM-DD': {e}. Proceeding without date filtering for this column if types are incompatible.")
+                    
+                    # Check type after potential conversion before filtering
+                    if pd.api.types.is_string_dtype(results_df['first_seen']):
+                        filtered_df = results_df[results_df['first_seen'] == today_str]
+                        results_df = filtered_df
+                    else:
+                        st.warning("Skipping date filtering as 'first_seen' is not in a comparable string format.")
+                else:
+                    st.warning("Warning: 'first_seen' column not found in results. Cannot apply date filter.")
+
                 # Define columns to display, checking if they exist
                 display_cols = []
                 potential_cols = ['displayName', 'shortFormattedAddress', 'rating', 'priceLevel', 'primary_type', 'user_rating_count', 'location']
