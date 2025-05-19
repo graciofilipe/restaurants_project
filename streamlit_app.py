@@ -12,7 +12,10 @@ except ImportError as e:
     # You might want to stop the app here or provide more specific instructions
     # For now, we'll let it potentially fail later if the import didn't work.
 
-def main():
+# Import for BigQuery Table Viewer
+from bq_table_viewer import display_bq_table
+
+def restaurant_finder_app(): # Renamed from main
     st.title("Restaurant Finder")
 
     # --- UI Elements ---
@@ -212,3 +215,22 @@ if __name__ == "__main__":
     st.info("This usually means the `restaurant_finder.main` module was not found. "
                 "Ensure the Streamlit app is launched from a context where this module is in the Python path, "
                 "or that the path adjustments in `app.py` are correct.")
+
+def main():
+    st.sidebar.title("Navigation")
+    app_choice = st.sidebar.radio("Choose App", ["Restaurant Finder", "BigQuery Table Viewer"])
+
+    if app_choice == "Restaurant Finder":
+        # Check if find_restaurants_in_batches was imported successfully before running restaurant_finder_app
+        if 'find_restaurants_in_batches' in globals() and 'get_latlong_from_bucket' in globals():
+            restaurant_finder_app()
+        else:
+            st.error("Restaurant Finder app cannot start because a backend function failed to import. "
+                     "This usually means the `restaurant_finder.main` module was not found or there's an issue with its dependencies.")
+            st.info("Ensure the Streamlit app is launched from a context where this module is in the Python path.")
+            # Optionally, you could display a message or part of the UI that doesn't depend on these imports
+    elif app_choice == "BigQuery Table Viewer":
+        display_bq_table()
+
+if __name__ == "__main__":
+    main() # Call the new main function
