@@ -205,32 +205,3 @@ def restaurant_finder_app(): # Renamed from main
         except Exception as e: # General catch-all for other unexpected errors
             st.error(f"An unexpected error occurred during GCS processing or restaurant finding: {e}")
             st.error("Details: " + str(e))
-
-if __name__ == "__main__":
-    # Check if find_restaurants_in_batches was imported successfully before running
-    if 'find_restaurants_in_batches' in globals():
-        main()
-    else:
-        st.error("Application cannot start because the backend function failed to import.")
-    st.info("This usually means the `restaurant_finder.main` module was not found. "
-                "Ensure the Streamlit app is launched from a context where this module is in the Python path, "
-                "or that the path adjustments in `app.py` are correct.")
-
-def main():
-    st.sidebar.title("Navigation")
-    app_choice = st.sidebar.radio("Choose App", ["Restaurant Finder", "BigQuery Table Viewer"])
-
-    if app_choice == "Restaurant Finder":
-        # Check if find_restaurants_in_batches was imported successfully before running restaurant_finder_app
-        if 'find_restaurants_in_batches' in globals() and 'get_latlong_from_bucket' in globals():
-            restaurant_finder_app()
-        else:
-            st.error("Restaurant Finder app cannot start because a backend function failed to import. "
-                     "This usually means the `restaurant_finder.main` module was not found or there's an issue with its dependencies.")
-            st.info("Ensure the Streamlit app is launched from a context where this module is in the Python path.")
-            # Optionally, you could display a message or part of the UI that doesn't depend on these imports
-    elif app_choice == "BigQuery Table Viewer":
-        display_bq_table()
-
-if __name__ == "__main__":
-    main() # Call the new main function
