@@ -4,8 +4,8 @@ import pandas as pd
 from google.cloud import storage
 from google.cloud import bigquery
 
-from aux_functions import access_secret_version
-from maps_call import send_request
+from restaurant_finder.aux_functions import access_secret_version
+from restaurant_finder.maps_call import send_request
 from restaurant_finder.config import (
     BIGQUERY_DATASET_ID,
     BIGQUERY_TABLE_ID,

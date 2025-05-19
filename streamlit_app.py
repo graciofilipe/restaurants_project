@@ -3,15 +3,10 @@ import pandas as pd
 import os
 import sys
 
-# Add the project root to sys.path to allow importing from run_restaurant_finder
-project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-if project_root not in sys.path:
-    sys.path.insert(0, project_root)
-
 try:
-    from run_restaurant_finder.main import find_restaurants_in_batches
+    from restaurant_finder.main import find_restaurants_in_batches
 except ImportError as e:
-    st.error(f"Error importing find_restaurants_in_batches: {e}. Ensure run_restaurant_finder module is accessible.")
+    st.error(f"Error importing find_restaurants_in_batches: {e}. Ensure restaurant_finder module is accessible.")
     # You might want to stop the app here or provide more specific instructions
     # For now, we'll let it potentially fail later if the import didn't work.
 
@@ -167,6 +162,6 @@ if __name__ == "__main__":
         main()
     else:
         st.error("Application cannot start because the backend function failed to import.")
-        st.info("This usually means the `run_restaurant_finder.main` module was not found. "
+    st.info("This usually means the `restaurant_finder.main` module was not found. "
                 "Ensure the Streamlit app is launched from a context where this module is in the Python path, "
                 "or that the path adjustments in `app.py` are correct.")
