@@ -29,33 +29,33 @@ def iterate_over_calls(lat_long_pairs, restaurants, project_id, amount_of_noise)
 
     for lat, long, radius in lat_long_pairs:
         lat_noise = np.random.normal(0, amount_of_noise)
-            lat = lat + lat_noise
-            long_noise = np.random.normal(0, amount_of_noise)
-            long = long + long_noise
+        lat = lat + lat_noise
+        long_noise = np.random.normal(0, amount_of_noise)
+        long = long + long_noise
 
 
-            response_json = send_request(lat, long, radius, rank, API_KEY)
-            if 'places' not in response_json:
-                print(str(lat) + str(long) +' had no results')
-            
+        response_json = send_request(lat, long, radius, rank, API_KEY)
+        if 'places' not in response_json:
+            print(str(lat) + str(long) +' had no results')
+        
+        else:
+            if len(response_json['places']) == 20:
+                print(str(lat) + str(long) +' had 20 results')
+
+                saturated_list.append((lat, long, radius))
             else:
-                if len(response_json['places']) == 20:
-                    print(str(lat) + str(long) +' had 20 results')
-
-                    saturated_list.append((lat, long, radius))
-                else:
-                    print(str(lat) + str(long) +' had 1-19 results')
-                    for place in response_json['places']:
-                        restaurants[place['id']] = {
-                            'displayName': place['displayName']['text'],
-                            'shortFormattedAddress': place.get('shortFormattedAddress', 'NA'),
-                            'rating': place.get('rating', 0),
-                            'priceLevel': place.get('priceLevel', 'NA'),
-                            'last_seen': formatted_date,
-                            'primary_type': place.get('primaryType', 'NA'),
-                            'user_rating_count': place.get('userRatingCount', 0),
-                            'types': place.get('types', [])
-                        }
+                print(str(lat) + str(long) +' had 1-19 results')
+                for place in response_json['places']:
+                    restaurants[place['id']] = {
+                        'displayName': place['displayName']['text'],
+                        'shortFormattedAddress': place.get('shortFormattedAddress', 'NA'),
+                        'rating': place.get('rating', 0),
+                        'priceLevel': place.get('priceLevel', 'NA'),
+                        'last_seen': formatted_date,
+                        'primary_type': place.get('primaryType', 'NA'),
+                        'user_rating_count': place.get('userRatingCount', 0),
+                        'types': place.get('types', [])
+                    }
 
     return restaurants, saturated_list
 
