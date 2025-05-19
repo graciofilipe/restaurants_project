@@ -1,6 +1,6 @@
-from data_processing import iterate_over_calls, update_json_and_save, upload_restaurants_to_bigquery
-from aux_functions import get_bucket_name, string_to_tuple, get_latlong_from_bucket
-from geo_functions import generate_spoke_points
+from restaurant_finder.data_processing import iterate_over_calls, update_json_and_save, upload_restaurants_to_bigquery
+from restaurant_finder.aux_functions import get_bucket_name, string_to_tuple, get_latlong_from_bucket
+from restaurant_finder.geo_functions import generate_spoke_points
 import argparse
 from datetime import datetime
 import os
