@@ -2,27 +2,33 @@ import json
 from datetime import datetime
 import pandas as pd
 from google.cloud import storage
-from maps_call import send_request
-from aux_functions import access_secret_version
 from google.cloud import bigquery
+
+from aux_functions import access_secret_version
+from maps_call import send_request
+from restaurant_finder.config import (
+    BIGQUERY_DATASET_ID,
+    BIGQUERY_TABLE_ID,
+    MAPS_API_KEY_SECRET_ID,
+)
 
 
 
 def iterate_over_calls(lat_long_pairs, restaurants, project_id, amount_of_noise):
     import numpy as np
 
-    API_KEY= access_secret_version(project_id=project_id, secret_id='maps-key')
+    API_KEY = access_secret_version(project_id=project_id, secret_id=MAPS_API_KEY_SECRET_ID)
 
     saturated_list = []
     
     today = datetime.today()
     formatted_date = today.strftime("%Y-%m-%d")
 
-    for rank in ["DISTANCE"]:
-        print(f'starting the {rank} based analysis')
+    rank = "DISTANCE"  # Rank is always "DISTANCE", so set it directly
+    print(f'starting the {rank} based analysis')
 
-        for lat, long, radius in lat_long_pairs:
-            lat_noise = np.random.normal(0, amount_of_noise)
+    for lat, long, radius in lat_long_pairs:
+        lat_noise = np.random.normal(0, amount_of_noise)
             lat = lat + lat_noise
             long_noise = np.random.normal(0, amount_of_noise)
             long = long + long_noise
@@ -67,17 +73,19 @@ def read_old_restaurants(bucket_name):
 
 
 def upload_restaurants_to_bigquery(concatenated_dict, project_id):
-    dataset_id = 'restaurants_dataset'
-    table_id = 'restaurants_table'
-    table_ref = f"{project_id}.{dataset_id}.{table_id}"
+    client = bigquery.Client(project=project_id)
+    table_ref = f"{project_id}.{BIGQUERY_DATASET_ID}.{BIGQUERY_TABLE_ID}"
 
+    # Note: This function implements a destructive update strategy.
+    # The existing table (if any) is deleted and recreated on each run.
+    # This is suitable if the table is intended to be a snapshot of the latest data.
+    # For data retention or incremental updates, a different approach would be needed.
     try:
-        client = bigquery.Client(project=project_id)
-        dataset_ref = client.dataset(dataset_id)
+        dataset_ref = client.dataset(BIGQUERY_DATASET_ID) # Now client is defined before this line
         client.delete_table(table_ref)
-        print(f"Table {table_id} deleted successfully.")
+        print(f"Table {BIGQUERY_TABLE_ID} deleted successfully.")
     except Exception as e:
-        print(f"Table {table_id} does not exist. Creating a new table.")
+        print(f"Table {BIGQUERY_TABLE_ID} does not exist. Creating a new table.")
 
     schema = [
         bigquery.SchemaField("restaurant_id", "STRING", mode="REQUIRED", description="Unique identifier for the restaurant"),
@@ -92,14 +100,23 @@ def upload_restaurants_to_bigquery(concatenated_dict, project_id):
         bigquery.SchemaField("types", "STRING", mode="REPEATED", description="A list of types associated with the restaurant - for example italian_restaurant or indonesian_restaurant - each restaurant can have multiple types")
     ]
     
-    # creating the client again due to caching conflicts
-    client = bigquery.Client(project=project_id)
-    dataset_ref = client.dataset(dataset_id)
+    # The client is already created, no need to create it again.
+    dataset_ref = client.dataset(BIGQUERY_DATASET_ID)
     table = bigquery.Table(table_ref, schema=schema)
-    table = client.create_table(table)  # Make an API request.
-    
-    print(f"Created table {table.project}.{table.dataset_id}.{table.table_id}")
-    table_ref = dataset_ref.table(table_id)
+    # Try to create the table. If it already exists, this might raise an error,
+    # which should be fine if the deletion logic failed silently or if the table
+    # truly didn't exist before. Consider adding exists_ok=True if appropriate for the API version.
+    try:
+        table = client.create_table(table)  # Make an API request.
+        print(f"Created table {table.project}.{table.dataset_id}.{table.table_id}")
+    except Exception as e: # Catch exception if table already exists
+        print(f"Table {table_ref} might already exist or another error occurred: {e}")
+        # If the table is needed for subsequent operations, ensure it's referenced correctly
+        # This assumes that if creation fails because it exists, we can still use it.
+        table = client.get_table(table_ref) # Ensure table object is valid for next step
+
+    # table_ref is already correctly defined.
+    # table_ref = dataset_ref.table(BIGQUERY_TABLE_ID) # This line is redundant
 
     rows_to_insert = []
     for restaurant_id, restaurant_data in concatenated_dict.items():
@@ -184,82 +201,5 @@ def update_json_and_save(new_data, bucket_name, project_id):
 
 
 
-
-
-def recurse_over_calls(lat, long, center, project_id, restaurants={}, list_of_called_points=[]):
-    import ipdb; ipdb.set_trace()
-    rank = "DISTANCE"
-    radius = 5000
-    API_KEY= access_secret_version(project_id=project_id, secret_id='maps-key')
-    today = datetime.today()
-    formatted_date = today.strftime("%Y-%m-%d")
-
-    if check_coordinates_are_close_to_centre(API_KEY, lat, long, center, walking_threshold=20):
-
-        print("SENDING A REQUEST!!!!!")
-        response_json = send_request(lat, long, radius, rank, API_KEY)
-        list_of_called_points.append((lat, long))
-
-        if len(response_json['places']) >= 20:
-            print("** 20 results **")
-
-            # capture the results anyway
-            for place in response_json['places']:
-                        restaurants[place['id']] = {
-                            'displayName': place['displayName']['text'],
-                            'shortFormattedAddress': place['shortFormattedAddress'],
-                            'rating': place.get('rating', 0),
-                            'priceLevel': place.get('priceLevel', "NA"),
-                            'last_seen': formatted_date,
-                        }
-            # create the 9 sub distances
-            new_points_list = generate_spoke_points(lat, long, radius_meters=400, num_points=4)
-            accepted_points_list = [point for point in new_points_list if not is_point_inside_polygon(list_of_called_points, point[0], point[1])]
-            print('accepted points list', accepted_points_list)
-            # call the function over the 9 subdistances
-            for point in new_points_list:
-                recurse_over_calls(point[0], point[1], center, project_id, restaurants, list_of_called_points)
-         
-        # the base case
-        elif len(response_json['places']) < 20 and len(response_json['places']) > 0:
-            print("** less than 20 results **")
-            # capture the results anyway
-            for place in response_json['places']:
-                        restaurants[place['id']] = {
-                            'displayName': place['displayName']['text'],
-                            'shortFormattedAddress': place['shortFormattedAddress'],
-                            'rating': place.get('rating', 0),
-                            'priceLevel': place.get('priceLevel', "NA"),
-                            'last_seen': formatted_date,
-                        }
-    return restaurants
-
-def is_point_inside_polygon(polygon_points, x1, y1):
-    """
-    Determines if a point is inside a polygon using the ray casting algorithm.
-
-    Args:
-        polygon_points: List of tuples representing (x, y) coordinates of the polygon's vertices.
-        x1: X coordinate of the point to check.
-        y1: Y coordinate of the point to check.
-
-    Returns:
-        True if the point is inside the polygon, False otherwise.
-    """
-    num_vertices = len(polygon_points)
-    inside = False
-    
-    # Iterate through all edges of the polygon
-    for i in range(num_vertices):
-        j = (i + 1) % num_vertices  # Next vertex (wrap around to 0 if at last vertex)
-        x_i, y_i = polygon_points[i]
-        x_j, y_j = polygon_points[j]
-
-        # Check if the horizontal ray from the point intersects the edge
-        intersect = (y_i > y1) != (y_j > y1) and (
-            x1 < (x_j - x_i) * (y1 - y_i) / (y_j - y_i) + x_i
-        )
-        if intersect:
-            inside = not inside  # Toggle inside/outside status with each intersection
-            
-    return inside
+# The functions recurse_over_calls and is_point_inside_polygon were removed as they were identified as dead code.
+# check_coordinates_are_close_to_centre (originally in geo_functions.py) was also part of this dead code.

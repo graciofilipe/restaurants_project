@@ -7,11 +7,12 @@ import os
 import random # Moved here as it's used in find_restaurants_in_batches
 
 
-def find_restaurants_in_batches(latlong_list_input: list[tuple[float, float, int]], 
-                                project_id_input: str, 
+def find_restaurants_in_batches(latlong_list_input: list[tuple[float, float, int]],
+                                project_id_input: str,
                                 radius_input: int, # Although radius is part of latlong_list_input, it's kept for consistency with original args
-                                limit_input: int, 
-                                amount_of_noise_input: float):
+                                limit_input: int,
+                                amount_of_noise_input: float,
+                                spoke_generation_radius_meters: int = 100):
     """
     Finds restaurants in batches based on a list of latitude/longitude points.
 
@@ -53,7 +54,7 @@ def find_restaurants_in_batches(latlong_list_input: list[tuple[float, float, int
     # Take the saturated list and generate spoke points
     points_list: list[tuple[float, float, int]] = []
     for lat, long, radius_val in saturated_list: # Assuming radius_val from saturated_list is what we need
-        points = generate_spoke_points(lat, long, 100)  # 100 meters away from point of saturation
+        points = generate_spoke_points(lat, long, spoke_generation_radius_meters)  # Use the new parameter
         # Ensure radius is at least 1, e.g. by max(1, int(radius_val / 2))
         new_radius = max(1, int(radius_val / 2))
         points_with_radius = [(new_lat, new_long, new_radius) for new_lat, new_long in points]
@@ -86,6 +87,7 @@ if __name__ == '__main__':
     parser.add_argument("--limit", required=False, type=int, default=20)
     parser.add_argument("--amount_of_noise", required=False, type=float, default=0.002)
     parser.add_argument("--latlong_resolution", required=False, type=int, default=2)
+    parser.add_argument("--spoke_radius", required=False, type=int, default=100)  # New argument
     args = parser.parse_args()
 
     print('These are the arguments passed: \n', args)
@@ -106,7 +108,8 @@ if __name__ == '__main__':
         project_id_input=project_id,
         radius_input=args.radius, # Pass original radius for consistency, though it's mainly used by get_latlong_from_bucket now
         limit_input=int(args.limit),
-        amount_of_noise_input=float(args.amount_of_noise)
+        amount_of_noise_input=float(args.amount_of_noise),
+        spoke_generation_radius_meters=args.spoke_radius  # Pass the new argument
     )
 
     print(f"Function find_restaurants_in_batches completed. Found {len(found_restaurants)} restaurants.")
