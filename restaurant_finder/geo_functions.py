@@ -2,15 +2,7 @@ from geopy.distance import geodesic
 from math import radians, cos, sin, atan2, pi
 import googlemaps
 
-
-
-def check_coordinates_are_close_to_centre(API, lat, long, center, walking_threshold=20):
-    gmaps = googlemaps.Client(key=API)
-    point1 = (lat, long)
-    dm = gmaps.distance_matrix(point1, center, mode='walking')
-    walking_minutes = (dm['rows'][0]['elements'][0]['duration']['value'])/60
-    return walking_minutes < walking_threshold
-
+# The function check_coordinates_are_close_to_centre was removed as it was identified as dead code.
 
 def generate_spoke_points(center_lat, center_long, distance, num_points=6):
     """

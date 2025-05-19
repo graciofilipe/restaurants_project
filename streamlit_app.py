@@ -24,20 +24,24 @@ def main():
     project_id_input = st.text_input("Google Cloud Project ID", 
                                      help="Your GCP Project ID is required for backend operations (GCS, BigQuery, Maps API).")
 
-    uploaded_file = st.file_uploader("Upload a CSV file with columns: 'latitude', 'longitude', and optionally 'radius' (in km)", 
+    uploaded_file = st.file_uploader("Upload a CSV file with columns: 'latitude', 'longitude', and optionally 'radius' (in km)",
                                      type="csv")
 
-    default_radius_km = st.number_input("Default Search Radius (km)", 
-                                        min_value=0.1, value=1.0, step=0.1,
-                                        help="Default radius around each coordinate if not specified in the CSV. Will be converted to meters for the backend.")
+    default_radius_for_input_km = st.number_input("Default Search Radius (km)",
+                                                  min_value=0.1, value=1.0, step=0.1,
+                                                  help="Enter radius in kilometers. This will be converted to meters for the backend processing.")
     
-    limit_coords = st.number_input("Limit number of coordinates to process", 
+    limit_coords = st.number_input("Limit number of coordinates to process",
                                    min_value=1, value=10, step=1,
                                    help="Maximum number of coordinates to process from the uploaded file.")
     
-    amount_of_noise = st.number_input("Amount of Noise (for coordinates)", 
+    amount_of_noise = st.number_input("Amount of Noise (for coordinates)",
                                       min_value=0.0, value=0.002, step=0.0001, format="%.4f",
                                       help="Noise added to coordinates for broader search, if needed by the backend.")
+
+    spoke_radius_input = st.number_input("Spoke Generation Radius (meters)",
+                                         min_value=10, value=100, step=10,
+                                         help="Radius in meters for generating additional search points around saturated areas.")
 
     if st.button("Find Restaurants"):
         # --- Processing Logic ---
@@ -63,7 +67,7 @@ def main():
                 st.stop()
 
             latlong_list_input = []
-            default_radius_meters = int(default_radius_km * 1000)
+            default_radius_meters = int(default_radius_for_input_km * 1000) # Use renamed variable
 
             for _, row in df.iterrows():
                 lat = row['latitude']
@@ -74,6 +78,7 @@ def main():
                     radius_for_point_meters = int(float(row['radius']) * 1000) 
                 else:
                     radius_for_point_meters = default_radius_meters
+                # Backend expects radius_for_point_meters in meters
                 latlong_list_input.append((lat, lon, radius_for_point_meters))
             
             if not latlong_list_input:
@@ -93,7 +98,8 @@ def main():
                     project_id_input=project_id_input,
                     radius_input=default_radius_meters, # General default radius in meters
                     limit_input=int(limit_coords),
-                    amount_of_noise_input=float(amount_of_noise)
+                    amount_of_noise_input=float(amount_of_noise),
+                    spoke_generation_radius_meters=int(spoke_radius_input) # Pass the new spoke radius
                 )
 
             # Display Results

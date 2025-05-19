@@ -3,7 +3,15 @@ from google.cloud import storage
 import numpy as np
 import pandas as pd
 
+from restaurant_finder.config import (
+    COORDINATES_BOTTOM_RIGHT_SUFFIX,
+    COORDINATES_TOP_LEFT_SUFFIX,
+    RESTAURANT_BUCKET_NAME_SECRET_ID,
+)
 
+# Imports moved from get_latlong_from_bucket
+# import pandas as pd # Already imported at the top
+# import numpy as np # Already imported at the top
 
 
 def get_latlong_from_bucket(project_id,
@@ -11,9 +19,6 @@ def get_latlong_from_bucket(project_id,
                             latlong_list, 
                             latlong_resolution,
                             radius):
-
-    import pandas as pd
-    import numpy as np
 
     # use pandas to download csv from gcs bucket
     df = pd.read_csv(f"gs://{bucket_name}/{latlong_list}", header=0, dtype={'LAT': np.float64, 'LONG': np.float64})
@@ -79,7 +84,7 @@ def get_bucket_name(project_id, version_id="latest"):
 
     # Create the Secret Manager client.
     client = secretmanager.SecretManagerServiceClient()
-    name = f"projects/{project_id}/secrets/restaurant_bucket_name/versions/{version_id}"
+    name = f"projects/{project_id}/secrets/{RESTAURANT_BUCKET_NAME_SECRET_ID}/versions/{version_id}"
     response = client.access_secret_version(request={"name": name})
     return response.payload.data.decode("UTF-8")
 
@@ -91,8 +96,8 @@ def get_coordinates(project_id, maps_zone_name, version_id="latest"):
 
     zone = maps_zone_name
 
-    top_lef_secret_name = f'{zone}_top_left'
-    bottom_right_secret_name = f'{zone}_bottom_right'
+    top_lef_secret_name = f'{zone}{COORDINATES_TOP_LEFT_SUFFIX}'
+    bottom_right_secret_name = f'{zone}{COORDINATES_BOTTOM_RIGHT_SUFFIX}'
 
     top_left = f"projects/{project_id}/secrets/{top_lef_secret_name}/versions/{version_id}"
     bottom_right = f"projects/{project_id}/secrets/{bottom_right_secret_name}/versions/{version_id}"
