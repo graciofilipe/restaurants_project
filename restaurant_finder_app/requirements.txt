@@ -47,3 +47,5 @@ fsspec
 gcsfs
 google-cloud-secret-manager
 google-cloud-bigquery
+streamlit
+pandas
