@@ -13,7 +13,7 @@ except ImportError as e:
     # For now, we'll let it potentially fail later if the import didn't work.
 
 # Import for BigQuery Table Viewer
-from bq_table_viewer import display_bq_table
+from .bq_table_viewer import display_bq_table
 
 def restaurant_finder_app(): # Renamed from main
     st.title("Restaurant Finder")
