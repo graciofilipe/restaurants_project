@@ -1,0 +1,5 @@
+  DEPRECATION: Building 'googlemaps' using the legacy setup.py bdist_wheel mechanism, which will be removed in a future version. pip 25.3 will enforce this behaviour change. A possible replacement is to use the standardized build interface by setting the `--use-pep517` option, (possibly combined with `--no-build-isolation`), or adding a `pyproject.toml` file to the source tree of 'googlemaps'. Discussion can be found at https://github.com/pypa/pip/issues/6334
+ERROR: pip's dependency resolver does not currently take into account all the packages that are installed. This behaviour is the source of the following dependency conflicts.
+pyproject-api 1.9.0 requires tomli>=2.2.1; python_version < "3.11", but you have tomli 2.0.1 which is incompatible.
+tox 4.25.0 requires cachetools>=5.5.1, but you have cachetools 5.3.3 which is incompatible.
+tox 4.25.0 requires tomli>=2.2.1; python_version < "3.11", but you have tomli 2.0.1 which is incompatible.

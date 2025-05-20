@@ -2,21 +2,47 @@ import streamlit as st
 import pandas as pd
 import os
 import sys
+import traceback # Added import
 from datetime import datetime
 
 try:
     from restaurant_finder.main import find_restaurants_in_batches
     from restaurant_finder.aux_functions import get_latlong_from_bucket
 except ImportError as e:
-    st.error(f"Error importing find_restaurants_in_batches or get_latlong_from_bucket: {e}. Ensure restaurant_finder module and its dependencies are accessible.")
-    # You might want to stop the app here or provide more specific instructions
-    # For now, we'll let it potentially fail later if the import didn't work.
+    # sys is already imported at the top
+    # traceback is now imported at the top
+    # Optional: print(f"IMPORT_ERROR_STILL_OCCURRING: {e}", file=sys.stderr)
+    # Optional: traceback.print_exc(file=sys.stderr) # Print full traceback to stderr
+    st.error(f"Failed to import critical modules: {e}. App functionality will be limited.")
+    # Make sure the app doesn't try to proceed as if imports worked
+    # For example, by not defining parts of the UI that depend on these imports,
+    # or by having the rest of restaurant_finder_app() be conditional.
+    # For now, st.error() is the main feedback if this still occurs.
+    # Ensure sys.exit() is removed.
 
 # Import for BigQuery Table Viewer
 from restaurant_finder.bq_table_viewer import display_bq_table
 
+import logging
+# sys is already imported
+
+# Configure root logger and Streamlit loggers to be verbose to stderr
+logging.basicConfig(
+    level=logging.DEBUG,
+    stream=sys.stderr,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+
+# You might want to set specific loggers if Streamlit uses named loggers,
+# but a global basicConfig at DEBUG level should capture a lot.
+# For example, to target a hypothetical 'streamlit.server' logger:
+# logging.getLogger('streamlit.server').setLevel(logging.DEBUG)
+
+st.write("App Loaded") # MODIFICATION 1: Add this line
+
 def restaurant_finder_app(): # Renamed from main
-    st.title("Restaurant Finder")
+    try: # MODIFICATION 2: Add try block
+        st.title("Restaurant Finder")
 
     # --- UI Elements ---
     st.header("Configuration")
@@ -205,3 +231,5 @@ def restaurant_finder_app(): # Renamed from main
         except Exception as e: # General catch-all for other unexpected errors
             st.error(f"An unexpected error occurred during GCS processing or restaurant finding: {e}")
             st.error("Details: " + str(e))
+    except Exception as e: # MODIFICATION 2: Add except block
+        st.exception(e)

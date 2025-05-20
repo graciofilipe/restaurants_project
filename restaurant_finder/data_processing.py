@@ -1,6 +1,7 @@
 import json
 from datetime import datetime
 import pandas as pd
+import numpy as np # Added import
 from google.cloud import storage
 from google.cloud import bigquery
 
@@ -15,7 +16,7 @@ from restaurant_finder.config import (
 
 
 def iterate_over_calls(lat_long_pairs, restaurants, project_id, amount_of_noise):
-    import numpy as np
+    # import numpy as np # Commented out from here
 
     API_KEY = access_secret_version(project_id=project_id, secret_id=MAPS_API_KEY_SECRET_ID)
 

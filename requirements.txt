@@ -46,6 +46,7 @@ wcwidth==0.2.13
 fsspec
 gcsfs
 google-cloud-secret-manager
+google-cloud-storage
 google-cloud-bigquery
 streamlit
 pandas

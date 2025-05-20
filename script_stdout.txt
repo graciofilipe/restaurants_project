@@ -1,0 +1,2 @@
+[2025-05-20 05:24:15.247846] Attempting to write to /tmp/streamlit_script_io.log from streamlit_app.py
+[2025-05-20 05:24:15.248238] Successfully wrote to /tmp/streamlit_script_io.log
